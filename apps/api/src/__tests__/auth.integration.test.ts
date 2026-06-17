@@ -14,7 +14,28 @@ vi.mock('ioredis', () => {
     Redis: vi.fn().mockImplementation(() => {
       return {
         on: vi.fn(),
-        call: vi.fn(),
+        call: vi.fn().mockImplementation((cmd, ...args) => {
+          if (cmd === 'script' && args[0] === 'load') {
+            return 'mock-sha1-hash';
+          }
+          if (cmd === 'evalsha') {
+            return [1, Date.now() + 15 * 60 * 1000];
+          }
+          return null;
+        }),
+      };
+    }),
+  };
+});
+
+// Mock rate-limit-redis
+vi.mock('rate-limit-redis', () => {
+  return {
+    default: vi.fn().mockImplementation(() => {
+      return {
+        increment: vi.fn().mockResolvedValue({ totalHits: 1, resetTime: new Date(Date.now() + 1000) }),
+        decrement: vi.fn(),
+        resetKey: vi.fn(),
       };
     }),
   };

@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { verifyEmailRequestSchema, VerifyEmailRequest } from '@repo/types';
 import api from '../../lib/axios';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
@@ -126,5 +126,13 @@ export default function VerifyEmailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen text-slate-400">Loading...</div>}>
+      <VerifyEmailContent />
+    </React.Suspense>
   );
 }

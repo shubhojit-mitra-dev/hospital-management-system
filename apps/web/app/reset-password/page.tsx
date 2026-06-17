@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { resetPasswordRequestSchema, ResetPasswordRequest } from '@repo/types';
 import api from '../../lib/axios';
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
@@ -132,5 +132,13 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen text-slate-400">Loading...</div>}>
+      <ResetPasswordContent />
+    </React.Suspense>
   );
 }
