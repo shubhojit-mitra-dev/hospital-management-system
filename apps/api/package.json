@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
+    "@repo/types": "workspace:*",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -38,10 +39,13 @@
     "@types/node": "^22.13.1",
     "@types/nodemailer": "^6.4.17",
     "@types/supertest": "^6.0.2",
-    "prisma": "^6.4.0",
+    "prisma": "6.19.3",
     "supertest": "^7.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "vitest": "^3.0.5"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
