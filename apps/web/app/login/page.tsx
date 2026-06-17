@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginRequestSchema, LoginRequest } from '@repo/types';
@@ -12,12 +12,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const loginStore = useAuthStore((state) => state.login);
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const passwordChanged = searchParams.get('passwordChanged') === '1';
 
   useEffect(() => {
     setIsMounted(true);
@@ -67,6 +69,11 @@ export default function LoginPage() {
 
   return (
     <AuthCard title="Hospital Portal" description="Sign in to your staff or patient account">
+      {passwordChanged && (
+        <div className="mb-4 text-center text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 p-3 rounded-lg">
+          ✓ Password updated successfully. Please sign in with your new password.
+        </div>
+      )}
       {error && (
         <div className="mb-4 text-center text-sm text-red-600 bg-red-50 border border-red-100 p-3 rounded-lg">
           {error}
@@ -122,5 +129,17 @@ export default function LoginPage() {
         </a>
       </div>
     </AuthCard>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen p-6">
+        <div className="w-full max-w-md h-[400px] rounded-2xl bg-white border border-slate-200/80 shadow-xl animate-pulse" />
+      </div>
+    }>
+      <LoginContent />
+    </React.Suspense>
   );
 }

@@ -478,7 +478,10 @@ export class AuthController {
       const passwordHash = await bcrypt.hash(newPassword, 10);
       await prisma.user.update({
         where: { id: user.id },
-        data: { passwordHash },
+        data: {
+          passwordHash,
+          forcePasswordChange: false, // clear the forced-change flag
+        },
       });
 
       return res.status(200).json({ message: 'Password changed successfully.' });
