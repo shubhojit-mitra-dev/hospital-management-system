@@ -25,7 +25,6 @@ export default function RegisterPage() {
 
   const nextStep = async (e: React.MouseEvent) => {
     e.preventDefault();
-    // Validate fields for Step 1
     const isValid = await trigger(['firstName', 'lastName', 'email', 'phone']);
     if (isValid) {
       setStep(2);
@@ -53,131 +52,153 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <h1 className="auth-title">Create Patient Account</h1>
-          <p className="auth-subtitle">Register to manage your appointments and records</p>
+    <div className="flex items-center justify-center min-h-screen p-6">
+      <div className="relative w-full max-w-md p-8 rounded-2xl bg-slate-900/45 backdrop-blur-xl border border-white/8 shadow-2xl overflow-hidden before:content-[''] before:absolute before:-top-1/2 before:-left-1/2 before:w-[200%] before:height-[200%] before:bg-[radial-gradient(circle,rgba(139,92,246,0.08)_0%,transparent_60%)] before:pointer-events-none">
+        
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-white to-violet-300 bg-clip-text text-transparent">
+            Create Patient Account
+          </h1>
+          <p className="text-sm text-slate-400">Register to manage your appointments and records</p>
         </div>
 
         {/* Wizard Steps indicator */}
-        <div className="wizard-steps">
-          <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '2px', background: 'rgba(255,255,255,0.05)', transform: 'translateY(-50%)', zIndex: 0 }}></div>
-          <div style={{ position: 'absolute', top: '50%', left: 0, width: step === 2 ? '100%' : '0%', height: '2px', background: 'hsl(var(--primary))', transform: 'translateY(-50%)', zIndex: 0, transition: 'width 0.3s ease' }}></div>
+        <div className="flex justify-between items-center mb-8 relative">
+          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-800 -translate-y-1/2 -z-10"></div>
+          <div 
+            className="absolute top-1/2 left-0 h-0.5 bg-violet-500 -translate-y-1/2 -z-10 transition-all duration-300"
+            style={{ width: step === 2 ? '100%' : '0%' }}
+          ></div>
           
-          <div className={`wizard-step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>1</div>
-          <div className={`wizard-step ${step >= 2 ? 'active' : ''}`}>2</div>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition z-10 ${step > 1 ? 'bg-emerald-600 text-white' : 'bg-violet-600 text-white shadow-lg shadow-violet-500/50 active'}`}>
+            1
+          </div>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition z-10 ${step === 2 ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/50' : 'bg-slate-800 text-slate-400 border border-white/10'}`}>
+            2
+          </div>
         </div>
 
         {error && (
-          <div className="form-error" style={{ marginBottom: '1rem', textAlign: 'center', background: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '0.375rem' }}>
+          <div className="mb-4 text-center text-sm text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           {step === 1 && (
-            <div>
-              <div className="form-group">
-                <label className="form-label" htmlFor="firstName">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-slate-200" htmlFor="firstName">
                   First Name
                 </label>
                 <input
                   id="firstName"
                   type="text"
-                  className={`form-input ${errors.firstName ? 'error' : ''}`}
+                  className={`w-full px-4 py-3 text-sm rounded-lg bg-slate-950/50 border ${errors.firstName ? 'border-red-400' : 'border-white/10'} text-white outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20`}
                   placeholder="John"
                   {...register('firstName')}
                 />
-                {errors.firstName && <p className="form-error">{errors.firstName.message}</p>}
+                {errors.firstName && <p className="text-xs text-red-400 mt-1.5">{errors.firstName.message}</p>}
               </div>
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="lastName">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-slate-200" htmlFor="lastName">
                   Last Name
                 </label>
                 <input
                   id="lastName"
                   type="text"
-                  className={`form-input ${errors.lastName ? 'error' : ''}`}
+                  className={`w-full px-4 py-3 text-sm rounded-lg bg-slate-950/50 border ${errors.lastName ? 'border-red-400' : 'border-white/10'} text-white outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20`}
                   placeholder="Doe"
                   {...register('lastName')}
                 />
-                {errors.lastName && <p className="form-error">{errors.lastName.message}</p>}
+                {errors.lastName && <p className="text-xs text-red-400 mt-1.5">{errors.lastName.message}</p>}
               </div>
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="email">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-slate-200" htmlFor="email">
                   Email Address
                 </label>
                 <input
                   id="email"
                   type="email"
-                  className={`form-input ${errors.email ? 'error' : ''}`}
+                  className={`w-full px-4 py-3 text-sm rounded-lg bg-slate-950/50 border ${errors.email ? 'border-red-400' : 'border-white/10'} text-white outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20`}
                   placeholder="john.doe@example.com"
                   {...register('email')}
                 />
-                {errors.email && <p className="form-error">{errors.email.message}</p>}
+                {errors.email && <p className="text-xs text-red-400 mt-1.5">{errors.email.message}</p>}
               </div>
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="phone">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-slate-200" htmlFor="phone">
                   Phone Number
                 </label>
                 <input
                   id="phone"
                   type="tel"
-                  className={`form-input ${errors.phone ? 'error' : ''}`}
+                  className={`w-full px-4 py-3 text-sm rounded-lg bg-slate-950/50 border ${errors.phone ? 'border-red-400' : 'border-white/10'} text-white outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20`}
                   placeholder="+919876543210"
                   {...register('phone')}
                 />
-                {errors.phone && <p className="form-error">{errors.phone.message}</p>}
+                {errors.phone && <p className="text-xs text-red-400 mt-1.5">{errors.phone.message}</p>}
               </div>
 
-              <button type="button" className="auth-btn" onClick={nextStep}>
+              <button
+                type="button"
+                className="w-full py-3 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:opacity-90 active:scale-[0.98] transition cursor-pointer flex items-center justify-center"
+                onClick={nextStep}
+              >
                 Next
               </button>
             </div>
           )}
 
           {step === 2 && (
-            <div>
-              <div className="form-group">
-                <label className="form-label" htmlFor="password">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-slate-200" htmlFor="password">
                   Password
                 </label>
                 <input
                   id="password"
                   type="password"
-                  className={`form-input ${errors.password ? 'error' : ''}`}
+                  className={`w-full px-4 py-3 text-sm rounded-lg bg-slate-950/50 border ${errors.password ? 'border-red-400' : 'border-white/10'} text-white outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20`}
                   placeholder="••••••••"
                   {...register('password')}
                 />
-                {errors.password && <p className="form-error">{errors.password.message}</p>}
+                {errors.password && <p className="text-xs text-red-400 mt-1.5">{errors.password.message}</p>}
               </div>
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="hospitalId">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-slate-200" htmlFor="hospitalId">
                   Hospital ID
                 </label>
                 <input
                   id="hospitalId"
                   type="text"
-                  className={`form-input ${errors.hospitalId ? 'error' : ''}`}
+                  className={`w-full px-4 py-3 text-sm rounded-lg bg-slate-950/50 border ${errors.hospitalId ? 'border-red-400' : 'border-white/10'} text-white outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20`}
                   placeholder="01HXY..."
                   {...register('hospitalId')}
                 />
-                {errors.hospitalId && <p className="form-error">{errors.hospitalId.message}</p>}
+                {errors.hospitalId && <p className="text-xs text-red-400 mt-1.5">{errors.hospitalId.message}</p>}
               </div>
 
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                <button type="button" className="auth-btn" style={{ background: 'rgba(255,255,255,0.05)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.1)' }} onClick={prevStep}>
+              <div className="flex gap-4 pt-2">
+                <button
+                  type="button"
+                  className="w-1/2 py-3 text-sm font-semibold rounded-lg text-white bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition cursor-pointer flex items-center justify-center border border-white/10"
+                  onClick={prevStep}
+                >
                   Back
                 </button>
-                <button type="submit" className="auth-btn" style={{ marginTop: 0 }} disabled={isLoading}>
+                <button
+                  type="submit"
+                  className="w-1/2 py-3 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:opacity-90 active:scale-[0.98] transition cursor-pointer flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <>
-                      <span className="spinner"></span>
+                      <span className="inline-block w-4 h-4 border-2 border-white/30 rounded-full border-t-white animate-spin mr-2"></span>
                       Registering...
                     </>
                   ) : (
@@ -189,9 +210,9 @@ export default function RegisterPage() {
           )}
         </form>
 
-        <div className="auth-footer">
+        <div className="mt-6 text-center text-sm text-slate-400">
           Already have an account?{' '}
-          <a href="/login" className="auth-link">
+          <a href="/login" className="text-violet-400 font-medium hover:underline">
             Sign In
           </a>
         </div>
