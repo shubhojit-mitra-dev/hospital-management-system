@@ -53,5 +53,5 @@ export const changePasswordRequestSchema = z.object({
 });
 export type ChangePasswordRequest = z.infer<typeof changePasswordRequestSchema>;
 
-export * from './permissions';
+export * from './permissions.js';
 
