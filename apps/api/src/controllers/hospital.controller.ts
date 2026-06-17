@@ -210,6 +210,51 @@ export class HospitalController {
     }
   }
 
+  static async activate(req: Request, res: Response) {
+    const id = req.params.id as string;
+    const { isActive } = req.body;
+
+    if (typeof isActive !== 'boolean') {
+      return res.status(400).json({ error: 'isActive must be a boolean' });
+    }
+
+    // Only SUPER_ADMIN can toggle hospital status
+    if (req.user?.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
+    }
+
+    try {
+      const hospital = await prisma.hospital.findFirst({
+        where: { id, deletedAt: null },
+      });
+
+      if (!hospital) {
+        return res.status(404).json({ error: 'Hospital not found' });
+      }
+
+      const updated = await prisma.hospital.update({
+        where: { id },
+        data: { isActive },
+      });
+
+      await AuditService.recordLog({
+        actorId: req.user?.id,
+        actorRole: req.user?.role,
+        hospitalId: id,
+        action: isActive ? 'ACTIVATE_HOSPITAL' : 'DEACTIVATE_HOSPITAL',
+        entityType: 'HOSPITAL',
+        entityId: id,
+        description: `${isActive ? 'Activated' : 'Deactivated'} hospital ${id}`,
+        ipAddress: req.ip,
+      });
+
+      return res.status(200).json(updated);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
   static async delete(req: Request, res: Response) {
     const id = req.params.id as string;
 

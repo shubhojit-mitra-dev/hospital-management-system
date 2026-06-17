@@ -37,6 +37,12 @@ router.delete(
   requirePermission('hospital:write'),
   HospitalController.delete
 );
+router.patch(
+  '/:id/activate',
+  authenticate,
+  requirePermission('hospital:write'),
+  HospitalController.activate
+);
 
 // Department CRUD endpoints nested under /hospitals/:hospitalId/departments
 router.post(

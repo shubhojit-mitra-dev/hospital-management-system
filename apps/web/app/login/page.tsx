@@ -42,8 +42,12 @@ export default function LoginPage() {
       loginStore(user, accessToken);
       if (user.forcePasswordChange) {
         router.push(`/reset-password?email=${encodeURIComponent(user.email)}`);
+      } else if (user.role === 'SUPER_ADMIN') {
+        router.push('/super-admin/hospitals');
+      } else if (user.role === 'HOSPITAL_ADMIN') {
+        router.push('/admin/departments');
       } else {
-        router.push('/');
+        router.push('/unauthorized');
       }
     } catch (err: any) {
       const errMsg = err.response?.data?.message || err.message || 'Failed to login';

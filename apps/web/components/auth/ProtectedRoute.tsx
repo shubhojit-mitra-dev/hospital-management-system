@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
 
@@ -12,8 +12,17 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
+  // Wait for zustand persist to hydrate from localStorage before making routing decisions
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // Zustand persist hydration happens synchronously after mount
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+
     if (!isAuthenticated) {
       router.push('/login');
     } else if (user?.forcePasswordChange) {
@@ -21,7 +30,16 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     } else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
       router.push('/unauthorized');
     }
-  }, [isAuthenticated, user, allowedRoles, router]);
+  }, [hydrated, isAuthenticated, user, allowedRoles, router]);
+
+  // Show loading skeleton while waiting for hydration
+  if (!hydrated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-teal-600 font-semibold animate-pulse">Loading...</div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

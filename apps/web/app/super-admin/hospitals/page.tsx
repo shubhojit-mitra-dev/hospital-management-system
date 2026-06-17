@@ -31,8 +31,9 @@ export default function HospitalsListPage() {
     try {
       const response = await api.get('/api/v1/hospitals');
       // The API might return { success: true, data: [...] } or { success: true, data: { hospitals: [...] } }
-      const data = response.data?.data;
-      const list = Array.isArray(data) ? data : data?.hospitals || [];
+      const data = response.data;
+      // API returns a plain array of hospitals
+      const list = Array.isArray(data) ? data : (data?.data ? (Array.isArray(data.data) ? data.data : data.data?.hospitals || []) : []);
       setHospitals(list);
     } catch (err: any) {
       console.error('Error fetching hospitals:', err);

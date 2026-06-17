@@ -1,14 +1,21 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../store/authStore';
 
 export default function Home() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+
     if (!isAuthenticated || !user) {
       router.push('/login');
     } else if (user.forcePasswordChange) {
@@ -20,7 +27,7 @@ export default function Home() {
     } else {
       router.push('/unauthorized');
     }
-  }, [isAuthenticated, user, router]);
+  }, [hydrated, isAuthenticated, user, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -30,4 +37,3 @@ export default function Home() {
     </div>
   );
 }
-
