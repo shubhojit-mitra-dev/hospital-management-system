@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hms-postgres
+    environment:
+      POSTGRES_DB: hms_db
+      POSTGRES_USER: hms_user
+      POSTGRES_PASSWORD: hms_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: hms-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
+  maildev:
+    image: maildev/maildev:latest
+    container_name: hms-maildev
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    restart: always
+
+volumes:
+  postgres_data:
+  redis_data:

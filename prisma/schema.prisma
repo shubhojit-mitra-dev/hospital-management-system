@@ -1,0 +1,114 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Hospital {
+  id             String       @id @db.Text
+  name           String
+  registrationNo String
+  address        String?
+  city           String?
+  state          String?
+  country        String?
+  phone          String?
+  email          String?
+  website        String?
+  logoUrl        String?
+  isActive       Boolean      @default(true)
+  settings       Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+  users          User[]
+  auditLogs      AuditLog[]
+  departments    Department[]
+}
+
+model User {
+  id               String            @id @db.Text
+  hospitalId       String
+  email            String            @unique
+  passwordHash     String
+  role             String
+  firstName        String
+  lastName         String
+  phone            String?
+  isActive         Boolean           @default(true)
+  isVerified       Boolean           @default(false)
+  lastLoginAt      DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  deletedAt        DateTime?
+  hospital         Hospital          @relation(fields: [hospitalId], references: [id])
+  refreshTokens    RefreshToken[]
+  otpCodes         OtpCode[]
+  auditLogs        AuditLog[]
+  headedDepartments Department[]     @relation("HeadDoctor")
+}
+
+model RefreshToken {
+  id        String    @id @db.Text
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+enum OtpPurpose {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
+model OtpCode {
+  id        String     @id @db.Text
+  userId    String
+  codeHash  String
+  purpose   OtpPurpose
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime   @default(now())
+  user      User       @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id          String    @id @db.Text
+  hospitalId  String?
+  actorId     String?
+  actorRole   String?
+  action      String
+  entityType  String
+  entityId    String?
+  description String
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  hospital    Hospital? @relation(fields: [hospitalId], references: [id])
+  actor       User?     @relation(fields: [actorId], references: [id])
+}
+
+model Department {
+  id           String    @id @db.Text
+  hospitalId   String
+  name         String
+  code         String
+  description  String?
+  floor        String?
+  headDoctorId String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  hospital     Hospital  @relation(fields: [hospitalId], references: [id])
+  headDoctor   User?     @relation("HeadDoctor", fields: [headDoctorId], references: [id])
+
+  @@unique([hospitalId, code])
+}
