@@ -36,7 +36,8 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const response = await api.post('/api/v1/auth/login', data);
-      const { accessToken, user } = response.data.data;
+      const responseData = response.data.data || response.data;
+      const { accessToken, user } = responseData;
       
       loginStore(user, accessToken);
       if (user.forcePasswordChange) {
