@@ -1,11 +1,11 @@
-import express from 'express';
+import express, { Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import { env } from './config/env.js';
 
-export const app = express();
+export const app: Express = express();
 
 app.use(cors());
 app.use(helmet());
