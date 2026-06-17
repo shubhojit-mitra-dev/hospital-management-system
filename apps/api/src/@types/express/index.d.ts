@@ -1,8 +1,9 @@
 export interface UserPayload {
   id: string;
   role: string;
-  hospitalId: string;
+  hospitalId: string | null;
 }
+
 
 declare global {
   namespace Express {

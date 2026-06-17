@@ -76,9 +76,13 @@ export class AuthController {
       });
 
       await AuditService.recordLog({
-        userId: user.id,
+        actorId: user.id,
+        actorRole: user.role,
+        hospitalId: user.hospitalId || undefined,
         action: 'PATIENT_REGISTER',
-        details: `Registered account for email ${email}`,
+        entityType: 'USER',
+        entityId: user.id,
+        description: `Registered account for email ${email}`,
         ipAddress: req.ip,
       });
 
@@ -129,9 +133,13 @@ export class AuthController {
       });
 
       await AuditService.recordLog({
-        userId: user.id,
+        actorId: user.id,
+        actorRole: user.role,
+        hospitalId: user.hospitalId || undefined,
         action: 'EMAIL_VERIFICATION_SUCCESS',
-        details: `Verified email address: ${email}`,
+        entityType: 'USER',
+        entityId: user.id,
+        description: `Verified email address: ${email}`,
         ipAddress: req.ip,
       });
 
@@ -201,6 +209,7 @@ export class AuthController {
           role: user.role,
           hospitalId: user.hospitalId,
           isVerified: user.isVerified,
+          forcePasswordChange: user.forcePasswordChange,
         },
       });
     } catch (err) {
@@ -287,6 +296,7 @@ export class AuthController {
           role: user.role,
           hospitalId: user.hospitalId,
           isVerified: user.isVerified,
+          forcePasswordChange: user.forcePasswordChange,
         },
       });
     } catch (error) {

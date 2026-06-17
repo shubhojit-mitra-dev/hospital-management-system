@@ -22,18 +22,26 @@ describe('Audit Service', () => {
     const { prisma } = await import('../../config/db.js');
 
     await AuditService.recordLog({
-      userId: 'user_123',
+      actorId: 'user_123',
       action: 'USER_LOGIN',
-      details: 'User logged in successfully',
+      entityType: 'USER',
+      description: 'User logged in successfully',
       ipAddress: '127.0.0.1'
     });
 
     expect(prisma.auditLog.create).toHaveBeenCalledWith({
       data: {
-        userId: 'user_123',
+        id: expect.any(String),
+        actorId: 'user_123',
+        actorRole: undefined,
+        hospitalId: undefined,
         action: 'USER_LOGIN',
-        details: 'User logged in successfully',
-        ipAddress: '127.0.0.1'
+        entityType: 'USER',
+        entityId: undefined,
+        description: 'User logged in successfully',
+        ipAddress: '127.0.0.1',
+        userAgent: undefined,
+        metadata: undefined,
       }
     });
   });

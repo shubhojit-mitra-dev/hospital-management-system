@@ -27,11 +27,12 @@ model Hospital {
   users          User[]
   auditLogs      AuditLog[]
   departments    Department[]
+  holidays       Holiday[]
 }
 
 model User {
   id               String            @id @db.Text
-  hospitalId       String
+  hospitalId       String?
   email            String            @unique
   passwordHash     String
   role             String
@@ -40,11 +41,12 @@ model User {
   phone            String?
   isActive         Boolean           @default(true)
   isVerified       Boolean           @default(false)
+  forcePasswordChange Boolean        @default(false)
   lastLoginAt      DateTime?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   deletedAt        DateTime?
-  hospital         Hospital          @relation(fields: [hospitalId], references: [id])
+  hospital         Hospital?         @relation(fields: [hospitalId], references: [id])
   refreshTokens    RefreshToken[]
   otpCodes         OtpCode[]
   auditLogs        AuditLog[]
@@ -111,4 +113,16 @@ model Department {
   headDoctor   User?     @relation("HeadDoctor", fields: [headDoctorId], references: [id])
 
   @@unique([hospitalId, code])
+}
+
+model Holiday {
+  id          String   @id @db.Text
+  hospitalId  String
+  date        DateTime @db.Date
+  name        String
+  isRecurring Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  hospital    Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  @@unique([hospitalId, date])
 }

@@ -3,7 +3,7 @@ import { AuthController } from '../controllers/auth.controller.js';
 import { authenticate } from '../middlewares/auth.middleware.js';
 import { authRateLimiter } from '../middlewares/rate-limit.middleware.js';
 
-const router = Router();
+const router: Router = Router();
 
 router.post('/register', authRateLimiter, AuthController.register);
 router.post('/verify-email', authRateLimiter, AuthController.verifyEmail);

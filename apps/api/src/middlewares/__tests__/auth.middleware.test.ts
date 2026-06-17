@@ -46,4 +46,44 @@ describe('Auth Middlewares', () => {
     middleware(mockRequest as Request, mockResponse as Response, nextFunction);
     expect(mockResponse.status).toHaveBeenCalledWith(403);
   });
+
+  it('should allow next if user has correct permissions in requirePermission', async () => {
+    const { requirePermission } = await import('../auth.middleware.js');
+    mockRequest.user = { id: 'u1', role: 'HOSPITAL_ADMIN', hospitalId: 'h1' };
+    const middleware = requirePermission('hospital:read', 'staff:write');
+    middleware(mockRequest as Request, mockResponse as Response, nextFunction);
+    expect(nextFunction).toHaveBeenCalled();
+  });
+
+  it('should return 403 if user lacks required permissions in requirePermission', async () => {
+    const { requirePermission } = await import('../auth.middleware.js');
+    mockRequest.user = { id: 'u1', role: 'PATIENT', hospitalId: 'h1' };
+    const middleware = requirePermission('staff:write');
+    middleware(mockRequest as Request, mockResponse as Response, nextFunction);
+    expect(mockResponse.status).toHaveBeenCalledWith(403);
+  });
+
+  it('should bypass requireHospital check for SUPER_ADMIN with null hospitalId', async () => {
+    const { requireHospital } = await import('../auth.middleware.js');
+    mockRequest.user = { id: 'u1', role: 'SUPER_ADMIN', hospitalId: null };
+    mockRequest.params = { hospitalId: 'h1' };
+    requireHospital(mockRequest as Request, mockResponse as Response, nextFunction);
+    expect(nextFunction).toHaveBeenCalled();
+  });
+
+  it('should allow requireHospital for matching hospitalId for non-SUPER_ADMIN', async () => {
+    const { requireHospital } = await import('../auth.middleware.js');
+    mockRequest.user = { id: 'u1', role: 'HOSPITAL_ADMIN', hospitalId: 'h1' };
+    mockRequest.params = { hospitalId: 'h1' };
+    requireHospital(mockRequest as Request, mockResponse as Response, nextFunction);
+    expect(nextFunction).toHaveBeenCalled();
+  });
+
+  it('should block requireHospital for mismatching hospitalId for non-SUPER_ADMIN', async () => {
+    const { requireHospital } = await import('../auth.middleware.js');
+    mockRequest.user = { id: 'u1', role: 'HOSPITAL_ADMIN', hospitalId: 'h1' };
+    mockRequest.params = { hospitalId: 'h2' };
+    requireHospital(mockRequest as Request, mockResponse as Response, nextFunction);
+    expect(mockResponse.status).toHaveBeenCalledWith(403);
+  });
 });

@@ -14,7 +14,7 @@ export class AdminController {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
-    if (!['HOSPITAL_ADMIN', 'DOCTOR', 'STAFF'].includes(role)) {
+    if (!['HOSPITAL_ADMIN', 'DOCTOR', 'NURSE', 'RECEPTIONIST', 'LAB_TECHNICIAN', 'PHARMACIST', 'BILLING_EXECUTIVE', 'STAFF'].includes(role)) {
       return res.status(400).json({ error: 'Invalid staff role' });
     }
 
@@ -45,6 +45,7 @@ export class AdminController {
           phone,
           isVerified: true, // Auto-verify staff
           isActive: true,
+          forcePasswordChange: true,
         },
       });
 
@@ -57,7 +58,7 @@ export class AdminController {
       await AuditService.recordLog({
         actorId: req.user!.id,
         actorRole: req.user!.role,
-        hospitalId,
+        hospitalId: hospitalId || undefined,
         action: 'CREATE_STAFF',
         entityType: 'USER',
         entityId: userId,
@@ -73,7 +74,7 @@ export class AdminController {
   }
 
   static async listStaff(req: Request, res: Response) {
-    const hospitalId = req.user!.role === 'SUPER_ADMIN' ? (req.query.hospitalId as string) : req.user!.hospitalId;
+    const hospitalId = (req.user!.role === 'SUPER_ADMIN' ? req.query.hospitalId : req.user!.hospitalId) as string | undefined;
 
     const whereClause: any = {
       role: { in: ['HOSPITAL_ADMIN', 'DOCTOR', 'STAFF'] },
@@ -108,7 +109,7 @@ export class AdminController {
   }
 
   static async getStaffDetails(req: Request, res: Response) {
-    const { id } = req.params;
+    const id = req.params.id as string;
     try {
       const user = await prisma.user.findFirst({
         where: { id, deletedAt: null },
@@ -139,7 +140,7 @@ export class AdminController {
   }
 
   static async updateStaff(req: Request, res: Response) {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { firstName, lastName, phone } = req.body;
 
     try {
@@ -163,7 +164,7 @@ export class AdminController {
       await AuditService.recordLog({
         actorId: req.user!.id,
         actorRole: req.user!.role,
-        hospitalId: user.hospitalId,
+        hospitalId: user.hospitalId || undefined,
         action: 'UPDATE_STAFF',
         entityType: 'USER',
         entityId: id,
@@ -179,7 +180,7 @@ export class AdminController {
   }
 
   static async toggleStaffStatus(req: Request, res: Response) {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { isActive } = req.body;
 
     if (typeof isActive !== 'boolean') {
@@ -207,7 +208,7 @@ export class AdminController {
       await AuditService.recordLog({
         actorId: req.user!.id,
         actorRole: req.user!.role,
-        hospitalId: user.hospitalId,
+        hospitalId: user.hospitalId || undefined,
         action: isActive ? 'ACTIVATE_STAFF' : 'DEACTIVATE_STAFF',
         entityType: 'USER',
         entityId: id,
@@ -223,7 +224,7 @@ export class AdminController {
   }
 
   static async deleteStaff(req: Request, res: Response) {
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     try {
       const user = await prisma.user.findFirst({
@@ -246,7 +247,7 @@ export class AdminController {
       await AuditService.recordLog({
         actorId: req.user!.id,
         actorRole: req.user!.role,
-        hospitalId: user.hospitalId,
+        hospitalId: user.hospitalId || undefined,
         action: 'DELETE_STAFF',
         entityType: 'USER',
         entityId: id,

@@ -1,18 +1,16 @@
 import { Router } from 'express';
 import { AdminController } from '../controllers/admin.controller.js';
-import { authenticate, authorize } from '../middlewares/auth.middleware.js';
+import { authenticate, requirePermission } from '../middlewares/auth.middleware.js';
 
-const router = Router();
+const router: Router = Router();
 
-// Guard all admin routes with authentication and staff check
 router.use(authenticate);
-router.use(authorize('SUPER_ADMIN', 'HOSPITAL_ADMIN'));
 
-router.post('/', AdminController.createStaff);
-router.get('/', AdminController.listStaff);
-router.get('/:id', AdminController.getStaffDetails);
-router.put('/:id', AdminController.updateStaff);
-router.patch('/:id/status', AdminController.toggleStaffStatus);
-router.delete('/:id', AdminController.deleteStaff);
+router.post('/', requirePermission('staff:write'), AdminController.createStaff);
+router.get('/', requirePermission('staff:read'), AdminController.listStaff);
+router.get('/:id', requirePermission('staff:read'), AdminController.getStaffDetails);
+router.put('/:id', requirePermission('staff:write'), AdminController.updateStaff);
+router.patch('/:id/status', requirePermission('staff:write'), AdminController.toggleStaffStatus);
+router.delete('/:id', requirePermission('staff:write'), AdminController.deleteStaff);
 
 export default router;

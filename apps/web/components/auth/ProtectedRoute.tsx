@@ -16,6 +16,8 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login');
+    } else if (user?.forcePasswordChange) {
+      router.push('/reset-password');
     } else if (allowedRoles && user && !allowedRoles.includes(user.role)) {
       router.push('/unauthorized');
     }
@@ -25,6 +27,16 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-gray-500">Redirecting to login...</div>
+      </div>
+    );
+  }
+
+  if (user?.forcePasswordChange) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-amber-600 font-semibold animate-pulse">
+          Password change required. Redirecting...
+        </div>
       </div>
     );
   }

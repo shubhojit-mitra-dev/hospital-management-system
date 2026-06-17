@@ -78,4 +78,21 @@ describe('ProtectedRoute', () => {
     expect(screen.getByText('Doctor Secret Content')).toBeDefined();
     expect(mockPush).not.toHaveBeenCalled();
   });
+
+  it('redirects to /reset-password if forcePasswordChange is true', () => {
+    useAuthStore.getState().login(
+      { id: '1', email: 'doc@hosp.com', role: 'DOCTOR', forcePasswordChange: true },
+      'token'
+    );
+
+    render(
+      <ProtectedRoute>
+        <div>Doctor Secret Content</div>
+      </ProtectedRoute>
+    );
+
+    expect(screen.queryByText('Doctor Secret Content')).toBeNull();
+    expect(screen.getByText('Password change required. Redirecting...')).toBeDefined();
+    expect(mockPush).toHaveBeenCalledWith('/reset-password');
+  });
 });

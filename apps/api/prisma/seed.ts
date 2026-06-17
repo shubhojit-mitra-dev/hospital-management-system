@@ -1,83 +1,37 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { ulid } from 'ulid';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding database...');
 
-  const hospitalId = 'hosp_default';
-  await prisma.hospital.upsert({
-    where: { id: hospitalId },
-    update: {},
-    create: {
-      id: hospitalId,
-      name: 'General Hospital',
-      registrationNo: 'REG123456',
-      address: '123 Health Ave',
-      city: 'New York',
-      state: 'NY',
-      country: 'USA',
-      isActive: true,
-    },
-  });
-
-  const defaultPasswordHash = await bcrypt.hash('Password123!', 10);
-
-  // Super Admin
-  await prisma.user.upsert({
-    where: { email: 'superadmin@hms.com' },
-    update: {},
-    create: {
-      id: 'usr_superadmin',
-      hospitalId,
-      email: 'superadmin@hms.com',
-      passwordHash: defaultPasswordHash,
-      role: 'SUPER_ADMIN',
-      firstName: 'Super',
-      lastName: 'Admin',
-      phone: '1111111111',
-      isVerified: true,
-      isActive: true,
-    },
-  });
-
-  // Hospital Admin
-  await prisma.user.upsert({
+  // Check if admin@hms.com already exists
+  const existingAdmin = await prisma.user.findUnique({
     where: { email: 'admin@hms.com' },
-    update: {},
-    create: {
-      id: 'usr_admin',
-      hospitalId,
-      email: 'admin@hms.com',
-      passwordHash: defaultPasswordHash,
-      role: 'HOSPITAL_ADMIN',
-      firstName: 'Hospital',
-      lastName: 'Admin',
-      phone: '2222222222',
-      isVerified: true,
-      isActive: true,
-    },
   });
 
-  // Doctor
-  await prisma.user.upsert({
-    where: { email: 'doctor@hms.com' },
-    update: {},
-    create: {
-      id: 'usr_doctor',
-      hospitalId,
-      email: 'doctor@hms.com',
-      passwordHash: defaultPasswordHash,
-      role: 'DOCTOR',
-      firstName: 'Doctor',
-      lastName: 'Strange',
-      phone: '3333333333',
-      isVerified: true,
-      isActive: true,
-    },
-  });
+  if (!existingAdmin) {
+    const passwordHash = await bcrypt.hash('Password@123', 10);
+    await prisma.user.create({
+      data: {
+        id: 'usr_superadmin',
+        email: 'admin@hms.com',
+        passwordHash,
+        role: 'SUPER_ADMIN',
+        firstName: 'System',
+        lastName: 'Administrator',
+        phone: '0000000000',
+        isVerified: true,
+        isActive: true,
+        forcePasswordChange: false,
+        hospitalId: null,
+      },
+    });
+    console.log('Default SUPER_ADMIN user admin@hms.com created.');
+  } else {
+    console.log('User admin@hms.com already exists. Skipping creation.');
+  }
 
   console.log('Database seeded successfully!');
 }

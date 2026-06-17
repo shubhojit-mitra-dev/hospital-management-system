@@ -7,6 +7,7 @@ export interface User {
   firstName?: string;
   lastName?: string;
   hospitalId?: string;
+  forcePasswordChange?: boolean;
 }
 
 export interface AuthState {

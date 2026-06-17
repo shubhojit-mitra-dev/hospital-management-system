@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import { env } from './config/env.js';
 import authRouter from './routes/auth.routes.js';
 import adminRouter from './routes/admin.routes.js';
+import hospitalRouter from './routes/hospital.routes.js';
 
 export const app: Express = express();
 
@@ -21,6 +22,7 @@ if (env.NODE_ENV !== 'test') {
 // Mount Routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/admin/users', adminRouter);
+app.use('/api/v1/hospitals', hospitalRouter);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });

@@ -39,7 +39,11 @@ export default function LoginPage() {
       const { accessToken, user } = response.data.data;
       
       loginStore(user, accessToken);
-      router.push('/');
+      if (user.forcePasswordChange) {
+        router.push(`/reset-password?email=${encodeURIComponent(user.email)}`);
+      } else {
+        router.push('/');
+      }
     } catch (err: any) {
       const errMsg = err.response?.data?.message || err.message || 'Failed to login';
       setError(errMsg);
