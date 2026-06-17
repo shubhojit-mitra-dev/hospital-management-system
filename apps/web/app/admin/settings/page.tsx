@@ -348,7 +348,7 @@ export default function HospitalSettingsPage() {
           <p className="text-sm text-slate-500">View and update customized clinic holidays in the calendar.</p>
         </div>
 
-        <HolidayCalendar hospitalId={hospitalId} />
+        <HolidayCalendar hospitalId={hospitalId ?? undefined} />
       </div>
     </div>
   );
