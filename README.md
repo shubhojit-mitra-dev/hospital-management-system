@@ -1,159 +1,605 @@
-# Turborepo starter
+# AI-Powered Hospital & Healthcare Management System (Enterprise Edition)
 
-This Turborepo starter is maintained by the Turborepo core team.
+## This project introduces :
 
-## Using this example
+- Complex Role-Based Access Control
+- Multi-Department Architecture
+- Real-Time Operations
+- Appointment Scheduling
+- Billing System
+- Medical Records
+- AI Agent Integration
+- Enterprise Workflow Design
+- Audit Logging
+- Notifications & Escalations
 
-Run the following command:
+This resembles the complexity of systems used by hospitals such as Apollo Hospitals, Fortis Healthcare, and Max Healthcare.
 
-```sh
-npx create-turbo@latest
+---
+
+# BUSINESS REQUIREMENT DOCUMENT (BRD)
+
+# 1. Project Overview
+
+## Project Name
+
+AI-Powered Hospital Management System (HMS)
+
+## Objective
+
+Develop a centralized platform that enables hospitals to manage:
+
+- Patients
+- Doctors
+- Staff
+- Appointments
+- Prescriptions
+- Billing
+- Medical Records
+- Emergency Cases
+
+while utilizing an AI Healthcare Assistant to improve operational efficiency.
+
+---
+
+# 2. Business Problem
+
+Current hospital processes suffer from:
+
+- Long appointment queues
+- Manual record management
+- Inefficient doctor scheduling
+- Lost patient records
+- Delayed billing
+- Poor communication between departments
+
+The hospital requires a digital platform to automate and streamline operations.
+
+---
+
+# 3. Stakeholders
+
+## Internal
+
+### Super Admin
+
+Owns the entire hospital system.
+
+### Hospital Administrator
+
+Manages daily operations.
+
+### Doctors
+
+Treat patients and manage records.
+
+### Nurses
+
+Assist doctors and update patient vitals.
+
+### Receptionists
+
+Manage appointments.
+
+### Lab Technicians
+
+Manage tests and reports.
+
+### Pharmacists
+
+Manage medicines and prescriptions.
+
+### Billing Team
+
+Handles payments and invoices.
+
+---
+
+## External
+
+### Patients
+
+Book appointments and access reports.
+
+---
+
+# 4. User Roles and Permissions
+
+---
+
+## Role 1: Super Admin
+
+### Permissions
+
+- Create hospitals
+- Manage departments
+- Create admins
+- Access all reports
+- Configure system settings
+- View audit logs
+
+---
+
+## Role 2: Hospital Admin
+
+### Permissions
+
+- Add doctors
+- Add nurses
+- Manage staff
+- Manage departments
+- Monitor hospital performance
+- Generate reports
+
+---
+
+## Role 3: Doctor
+
+### Permissions
+
+- View assigned patients
+- View patient history
+- Create prescriptions
+- Order lab tests
+- Write diagnoses
+- Update treatment plans
+
+---
+
+## Role 4: Nurse
+
+### Permissions
+
+- Record vitals
+- Update treatment status
+- View assigned patients
+
+---
+
+## Role 5: Receptionist
+
+### Permissions
+
+- Schedule appointments
+- Register patients
+- Check doctor availability
+
+---
+
+## Role 6: Lab Technician
+
+### Permissions
+
+- Upload test reports
+- Update test status
+
+---
+
+## Role 7: Pharmacist
+
+### Permissions
+
+- View prescriptions
+- Dispense medicines
+- Manage inventory
+
+---
+
+## Role 8: Billing Executive
+
+### Permissions
+
+- Generate invoices
+- Manage payments
+- Create insurance claims
+
+---
+
+## Role 9: Patient
+
+### Permissions
+
+- Book appointments
+- View prescriptions
+- Download reports
+- Make payments
+
+---
+
+# 5. Functional Requirements
+
+---
+
+# Module 1: Authentication & Authorization
+
+## Features
+
+### Registration
+
+Patients only.
+
+### Staff Accounts
+
+Created only by Hospital Admin.
+
+### Login
+
+Email + Password
+
+### Security
+
+- JWT Authentication
+- Refresh Tokens
+- Session Management
+
+---
+
+# Module 2: Patient Management
+
+## Create Patient Profile
+
+Fields:
+
+```
+Patient ID
+Name
+DOB
+Gender
+Blood Group
+Phone
+Address
+Emergency Contact
+Insurance Information
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## Medical History
 
-### Apps and Packages
+Store:
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- Allergies
+- Previous Diseases
+- Surgeries
+- Medications
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+---
 
-### Utilities
+# Module 3: Appointment Management
 
-This Turborepo has some additional tools already setup for you:
+## Patient Books Appointment
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+Select:
 
-### Build
+- Department
+- Doctor
+- Date
+- Time Slot
 
-To build all apps and packages, run the following command:
+---
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+## Appointment Status
 
-```sh
-cd my-turborepo
-turbo build
+```
+Requested
+↓
+Confirmed
+↓
+In Consultation
+↓
+Completed
+↓
+Cancelled
 ```
 
-Without global `turbo`, use your package manager:
+---
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
+## Features
+
+- Calendar View
+- Appointment Reminders
+- Rescheduling
+
+---
+
+# Module 4: Doctor Consultation Module
+
+Doctor can:
+
+### View
+
+- Patient History
+- Previous Reports
+- Allergies
+
+### Create
+
+- Diagnosis
+- Treatment Plan
+- Prescription
+
+---
+
+# Module 5: Electronic Medical Records (EMR)
+
+Store:
+
+### Documents
+
+- Prescriptions
+- Lab Reports
+- X-Rays
+- MRI Reports
+
+### Features
+
+- Upload
+- Download
+- Search
+- Categorize
+
+---
+
+# Module 6: Laboratory Management
+
+## Test Request Workflow
+
+```
+Doctor Orders Test
+↓
+Lab Receives Request
+↓
+Sample Collection
+↓
+Testing
+↓
+Report Generation
+↓
+Doctor Review
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## Types
 
-```sh
-turbo build --filter=docs
+- Blood Test
+- X-Ray
+- MRI
+- CT Scan
+
+---
+
+# Module 7: Pharmacy Management
+
+## Medicine Inventory
+
+Track:
+
+- Stock
+- Expiry Dates
+- Suppliers
+
+---
+
+## Prescription Fulfillment
+
+```
+Doctor Prescription
+↓
+Pharmacy Verification
+↓
+Medicine Dispensing
 ```
 
-Without global `turbo`:
+---
 
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+# Module 8: Billing & Payments
+
+Generate invoices for:
+
+- Consultation
+- Lab Tests
+- Medicines
+- Admission Charges
+
+---
+
+## Payment Methods
+
+- UPI
+- Card
+- Cash
+
+---
+
+# Module 9: Inpatient Admission Management
+
+### Admission Process
+
+```
+Patient Admitted
+↓
+Room Assigned
+↓
+Treatment
+↓
+Discharge
 ```
 
-### Develop
+---
 
-To develop all apps and packages, run the following command:
+Track:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+- Room Availability
+- Bed Allocation
+- Ward Assignment
 
-```sh
-cd my-turborepo
-turbo dev
+---
+
+# Module 10: Emergency Management
+
+Emergency Cases:
+
+- Immediate Registration
+- Priority Queue
+- Emergency Doctor Assignment
+
+---
+
+# Module 11: Notifications System
+
+Notifications for:
+
+### Patients
+
+- Appointment Reminder
+- Prescription Ready
+- Report Available
+
+### Doctors
+
+- New Appointment
+- Emergency Case
+
+### Admin
+
+- Inventory Alerts
+- Critical Incidents
+
+---
+
+# Module 12: Reports & Analytics
+
+## Hospital Dashboard
+
+Metrics:
+
+- Daily Patients
+- Revenue
+- Doctor Utilization
+- Lab Workload
+- Bed Occupancy
+
+---
+
+## Graphs
+
+- Revenue Trends
+- Department Performance
+- Patient Volume Trends
+
+---
+
+# 6. AI Feature (Mandatory)
+
+# AI Healthcare Assistant
+
+The AI Assistant should be available throughout the system.
+
+---
+
+## Feature 1: AI Symptom Analyzer
+
+Patient enters:
+
+```
+Fever
+Cough
+Headache
 ```
 
-Without global `turbo`, use your package manager:
+AI suggests:
 
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
+```
+Possible Conditions
+Recommended Department
+Urgency Level
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+_Disclaimer: Not a medical diagnosis._
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+---
 
-```sh
-turbo dev --filter=web
+## Feature 2: AI Medical Record Summarizer
+
+Doctor clicks:
+
+```
+Summarize Patient History
 ```
 
-Without global `turbo`:
+AI generates:
 
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+```
+Patient has diabetes for 5 years.
+Previous surgery in 2021.
+Allergic to penicillin.
 ```
 
-### Remote Caching
+---
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+## Feature 3: AI Prescription Explanation Bot
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+Patient asks:
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
+```
+How should I take this medicine?
 ```
 
-Without global `turbo`, use your package manager:
+AI explains in simple language.
 
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
+---
+
+## Feature 4: AI Appointment Assistant
+
+Patient asks:
+
+```
+I need a heart specialist next week.
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+AI suggests:
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+- Available Doctors
+- Time Slots
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+---
 
-```sh
-turbo link
+## Feature 5: AI Operations Dashboard
+
+Hospital Admin asks:
+
+```
+Why did revenue decrease this month?
 ```
 
-Without global `turbo`:
+AI analyzes:
 
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
+- Appointment Trends
+- Patient Volume
+- Department Performance
 
-## Useful Links
+and generates insights.
 
-Learn more about the power of Turborepo:
+---
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+# 7. Non-Functional Requirements
+
+## Performance
+
+- Response time < 2 seconds
+
+## Scalability
+
+- 10,000+ Patients
+
+## Availability
+
+- 99.9% Uptime
+
+## Security
+
+- Password Hashing
+- JWT Authentication
+- Audit Logs
+- Role-Based Access Control
