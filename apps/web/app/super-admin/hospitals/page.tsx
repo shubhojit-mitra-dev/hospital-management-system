@@ -152,7 +152,8 @@ export default function HospitalsListPage() {
                 <h3 className="font-bold text-slate-800 text-lg mb-1 leading-snug line-clamp-1" title={hospital.name}>
                   {hospital.name}
                 </h3>
-                <p className="text-[11px] font-mono text-slate-400 mb-4 uppercase tracking-wider">Reg: {hospital.registrationNo}</p>
+                <p className="text-[11px] font-mono text-slate-400 mb-1 uppercase tracking-wider">Reg: {hospital.registrationNo}</p>
+                <p className="text-[11px] font-mono text-teal-600 mb-4 select-all">ID: {hospital.id}</p>
 
                 {/* Details */}
                 <div className="space-y-2.5 text-slate-600 text-xs">

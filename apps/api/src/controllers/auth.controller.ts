@@ -54,6 +54,54 @@ export class AuthController {
         },
       });
 
+      // Link or create corresponding Patient record
+      const existingPatient = await prisma.patient.findFirst({
+        where: { email, hospitalId },
+      });
+
+      if (existingPatient) {
+        await prisma.patient.update({
+          where: { id: existingPatient.id },
+          data: { userId: user.id },
+        });
+      } else {
+        const count = await prisma.patient.count({
+          where: { hospitalId },
+        });
+        const patientNumber = `PAT-${String(count + 1).padStart(8, '0')}`;
+        const patientId = `pat_${ulid().toLowerCase()}`;
+
+        await prisma.patient.create({
+          data: {
+            id: patientId,
+            hospitalId,
+            userId: user.id,
+            patientNumber,
+            firstName,
+            lastName,
+            dateOfBirth: new Date('1990-01-01'), // Default date of birth since it's not collected during register
+            gender: 'OTHER', // Default gender
+            phone,
+            email,
+            isActive: true,
+          },
+        });
+
+        // Initialize medical history
+        await prisma.patientMedicalHistory.create({
+          data: {
+            id: `pmh_${ulid().toLowerCase()}`,
+            patientId,
+            hospitalId,
+            allergies: [],
+            conditions: [],
+            surgeries: [],
+            medications: [],
+            familyHistory: [],
+          },
+        });
+      }
+
       // Create Verification OTP code
       const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
       const codeHash = crypto.createHash('sha256').update(otpCode).digest('hex');
@@ -74,6 +122,10 @@ export class AuthController {
         subject: 'Verify your HMS Email',
         text: `Your email verification OTP code is: ${otpCode}. It expires in 15 minutes.`,
       });
+
+      if (env.NODE_ENV === 'development') {
+        console.log(`\n===========================================\n>>> [OTP CODE FOR DEVELOPMENT]: ${otpCode}\n===========================================\n`);
+      }
 
       await AuditService.recordLog({
         actorId: user.id,
@@ -199,6 +251,10 @@ export class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
+      const patient = user.role === 'PATIENT' ? await prisma.patient.findUnique({
+        where: { userId: user.id },
+      }) : null;
+
       return res.status(200).json({
         accessToken,
         user: {
@@ -210,6 +266,7 @@ export class AuthController {
           hospitalId: user.hospitalId,
           isVerified: user.isVerified,
           forcePasswordChange: user.forcePasswordChange,
+          patientId: patient?.id,
         },
       });
     } catch (err) {
@@ -286,6 +343,10 @@ export class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
+      const patient = user.role === 'PATIENT' ? await prisma.patient.findUnique({
+        where: { userId: user.id },
+      }) : null;
+
       return res.status(200).json({
         accessToken: newAccessToken,
         user: {
@@ -297,6 +358,7 @@ export class AuthController {
           hospitalId: user.hospitalId,
           isVerified: user.isVerified,
           forcePasswordChange: user.forcePasswordChange,
+          patientId: patient?.id,
         },
       });
     } catch (error) {
@@ -357,6 +419,10 @@ export class AuthController {
         subject: 'Reset your HMS Password',
         text: `Your password reset code is: ${resetCode}. It expires in 15 minutes.`,
       });
+
+      if (env.NODE_ENV === 'development') {
+        console.log(`\n===========================================\n>>> [PASSWORD RESET OTP CODE FOR DEVELOPMENT]: ${resetCode}\n===========================================\n`);
+      }
 
       return res.status(200).json({ message: 'If the email exists, a password reset link has been sent.' });
     } catch (err) {
@@ -432,6 +498,10 @@ export class AuthController {
         return res.status(404).json({ error: 'User not found' });
       }
 
+      const patient = user.role === 'PATIENT' ? await prisma.patient.findUnique({
+        where: { userId: user.id },
+      }) : null;
+
       return res.status(200).json({
         user: {
           id: user.id,
@@ -441,6 +511,7 @@ export class AuthController {
           role: user.role,
           hospitalId: user.hospitalId,
           isVerified: user.isVerified,
+          patientId: patient?.id,
         },
       });
     } catch (err) {

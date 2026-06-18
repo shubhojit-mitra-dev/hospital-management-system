@@ -4,27 +4,38 @@ import { env } from '../config/env.js';
 export class EmailService {
   private static transporter: nodemailer.Transporter | null = null;
 
-  private static getTransporter(): nodemailer.Transporter {
+  private static getTransporter(): nodemailer.Transporter | null {
     if (!this.transporter) {
-      if (env.NODE_ENV === 'development') {
+      if (env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASS) {
+        // Real SMTP configuration
+        this.transporter = nodemailer.createTransport({
+          host: env.SMTP_HOST,
+          port: env.SMTP_PORT || 587,
+          secure: env.SMTP_PORT === 465,
+          auth: {
+            user: env.SMTP_USER,
+            pass: env.SMTP_PASS,
+          },
+        });
+      } else if (env.NODE_ENV === 'development') {
+        // Local Maildev fallback in development
         this.transporter = nodemailer.createTransport({
           host: 'localhost',
           port: 1025,
           ignoreTLS: true,
         });
       } else {
-        // Standard production fallback or logs
         this.transporter = null;
       }
     }
-    return this.transporter!;
+    return this.transporter;
   }
 
   static async sendEmail(options: { to: string; subject: string; text: string; html?: string }): Promise<void> {
-    if (env.NODE_ENV === 'development') {
-      const tx = this.getTransporter();
+    const tx = this.getTransporter();
+    if (tx) {
       await tx.sendMail({
-        from: 'no-reply@hms.com',
+        from: env.SMTP_FROM || 'no-reply@hms.com',
         to: options.to,
         subject: options.subject,
         text: options.text,

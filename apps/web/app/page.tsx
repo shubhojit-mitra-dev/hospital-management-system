@@ -26,6 +26,8 @@ export default function Home() {
       router.push('/admin/departments');
     } else if (['RECEPTIONIST', 'DOCTOR', 'NURSE'].includes(user.role)) {
       router.push('/patients');
+    } else if (user.role === 'PATIENT') {
+      router.push(`/patients/${user.patientId || ''}`);
     } else {
       router.push('/unauthorized');
     }

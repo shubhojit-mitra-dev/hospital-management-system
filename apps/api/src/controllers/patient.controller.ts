@@ -39,6 +39,33 @@ export class PatientController {
     }
 
     try {
+      // Check if patient with this email already exists
+      if (email) {
+        const existingPatient = await prisma.patient.findFirst({
+          where: { email, hospitalId, deletedAt: null },
+        });
+        if (existingPatient) {
+          return res.status(400).json({ error: 'A patient profile with this email already exists.' });
+        }
+      }
+
+      // Check if a User with this email already exists (e.g., registered separately)
+      let resolvedUserId = userId || null;
+      if (email && !resolvedUserId) {
+        const existingUser = await prisma.user.findFirst({
+          where: { email, role: 'PATIENT' }
+        });
+        if (existingUser) {
+          const userLinkedPatient = await prisma.patient.findUnique({
+            where: { userId: existingUser.id }
+          });
+          if (userLinkedPatient) {
+            return res.status(400).json({ error: 'A patient profile is already linked to this email address.' });
+          }
+          resolvedUserId = existingUser.id;
+        }
+      }
+
       const count = await prisma.patient.count({
         where: { hospitalId },
       });
@@ -51,7 +78,7 @@ export class PatientController {
         data: {
           id,
           hospitalId,
-          userId,
+          userId: resolvedUserId,
           patientNumber,
           firstName,
           lastName,

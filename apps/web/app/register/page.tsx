@@ -53,7 +53,7 @@ export default function RegisterPage() {
       await api.post('/api/v1/auth/register', data);
       router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
     } catch (err: any) {
-      const errMsg = err.response?.data?.message || err.message || 'Failed to register';
+      const errMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to register';
       setError(errMsg);
     } finally {
       setIsLoading(false);

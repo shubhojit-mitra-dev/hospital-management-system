@@ -50,11 +50,13 @@ function LoginContent() {
         router.push('/admin/departments');
       } else if (['RECEPTIONIST', 'DOCTOR', 'NURSE'].includes(user.role)) {
         router.push('/patients');
+      } else if (user.role === 'PATIENT') {
+        router.push(`/patients/${user.patientId || ''}`);
       } else {
         router.push('/unauthorized');
       }
     } catch (err: any) {
-      const errMsg = err.response?.data?.message || err.message || 'Failed to login';
+      const errMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to login';
       setError(errMsg);
     } finally {
       setIsLoading(false);

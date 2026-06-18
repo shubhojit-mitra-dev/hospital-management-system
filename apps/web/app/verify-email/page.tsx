@@ -52,7 +52,7 @@ function VerifyEmailContent() {
       await api.post('/api/v1/auth/verify-email', data);
       router.push('/login');
     } catch (err: any) {
-      const errMsg = err.response?.data?.message || err.message || 'Failed to verify email';
+      const errMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to verify email';
       setError(errMsg);
     } finally {
       setIsLoading(false);

@@ -53,6 +53,16 @@ vi.mock('../config/db.js', () => {
         create: vi.fn(),
         update: vi.fn(),
       },
+      patient: {
+        findFirst: vi.fn(),
+        findUnique: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        count: vi.fn(),
+      },
+      patientMedicalHistory: {
+        create: vi.fn(),
+      },
       otpCode: {
         create: vi.fn(),
         findFirst: vi.fn(),
@@ -90,6 +100,10 @@ describe('Auth Integration Endpoints', () => {
     vi.mocked(prisma.hospital.findUnique).mockResolvedValue({ id: 'hosp_123', name: 'Hosp' } as any);
     vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
     vi.mocked(prisma.user.create).mockResolvedValue({ id: 'user_123', email: 'johndoe@example.com' } as any);
+    vi.mocked(prisma.patient.findFirst).mockResolvedValue(null);
+    vi.mocked(prisma.patient.count).mockResolvedValue(0);
+    vi.mocked(prisma.patient.create).mockResolvedValue({ id: 'pat_123' } as any);
+    vi.mocked(prisma.patientMedicalHistory.create).mockResolvedValue({} as any);
     vi.mocked(prisma.otpCode.create).mockResolvedValue({ id: 'otp_123' } as any);
     vi.mocked(prisma.auditLog.create).mockResolvedValue({ id: 'log_123' } as any);
 
@@ -123,6 +137,7 @@ describe('Auth Integration Endpoints', () => {
       isVerified: true,
     } as any);
 
+    vi.mocked(prisma.patient.findUnique).mockResolvedValue({ id: 'pat_123' } as any);
     vi.mocked(prisma.refreshToken.create).mockResolvedValue({ id: 'tok_123' } as any);
     vi.mocked(prisma.user.update).mockResolvedValue({} as any);
 
@@ -185,6 +200,7 @@ describe('Auth Integration Endpoints', () => {
       isVerified: true,
     } as any);
 
+    vi.mocked(prisma.patient.findUnique).mockResolvedValue({ id: 'pat_123' } as any);
     vi.mocked(prisma.refreshToken.update).mockResolvedValue({} as any);
     vi.mocked(prisma.refreshToken.create).mockResolvedValue({} as any);
 

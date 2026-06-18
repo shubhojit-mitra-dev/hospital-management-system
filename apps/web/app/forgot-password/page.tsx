@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
       setSuccess('Reset code has been sent to your email.');
       router.push(`/reset-password?email=${encodeURIComponent(data.email)}`);
     } catch (err: any) {
-      const errMsg = err.response?.data?.message || err.message || 'Failed to request reset OTP';
+      const errMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to request reset OTP';
       setError(errMsg);
     } finally {
       setIsLoading(false);
