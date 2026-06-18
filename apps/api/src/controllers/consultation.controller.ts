@@ -6,7 +6,7 @@ import { AuditService } from '../services/audit.service.js';
 export class ConsultationController {
   static async start(req: Request, res: Response) {
     const { appointmentId } = req.body;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     if (!appointmentId || !hospitalId) {
       return res.status(400).json({ error: 'appointmentId and hospitalId are required' });
@@ -74,7 +74,7 @@ export class ConsultationController {
 
   static async getById(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     try {
       const consultation = await prisma.consultation.findFirst({
@@ -103,7 +103,7 @@ export class ConsultationController {
 
   static async getByAppointmentId(req: Request, res: Response) {
     const appointmentId = req.params.appointmentId as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     try {
       const consultation = await prisma.consultation.findFirst({
@@ -132,7 +132,7 @@ export class ConsultationController {
 
   static async update(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     const { subjective, objective, assessment, plan, chiefComplaint, diagnosis, icdCodes, severity, followUpRequired, followUpAfterDays, followUpNotes } = req.body;
 
     try {
@@ -174,7 +174,7 @@ export class ConsultationController {
 
   static async complete(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     try {
       const consultation = await prisma.consultation.findFirst({
@@ -225,7 +225,7 @@ export class ConsultationController {
 
   // Prescription creation
   static async createPrescription(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     const { consultationId, notes, items } = req.body; // items is array of { medicineName, genericName, dosage, form, route, frequency, durationDays, quantity, instructions }
 
     if (!consultationId || !hospitalId || !Array.isArray(items)) {
