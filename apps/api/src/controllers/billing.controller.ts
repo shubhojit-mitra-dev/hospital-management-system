@@ -255,7 +255,7 @@ export class BillingController {
 
       // Recalculate invoice subtotal
       const items = await prisma.invoiceItem.findMany({ where: { invoiceId: id } });
-      const newSubtotal = items.reduce((acc, item) => acc + Number(item.totalPrice), 0);
+      const newSubtotal = items.reduce((acc: number, item: any) => acc + Number(item.totalPrice), 0);
 
       // Re-evaluate discount/taxes
       const sub = newSubtotal;
@@ -310,7 +310,7 @@ export class BillingController {
 
       // Recalculate invoice subtotal
       const items = await prisma.invoiceItem.findMany({ where: { invoiceId: id } });
-      const newSubtotal = items.reduce((acc, item) => acc + Number(item.totalPrice), 0);
+      const newSubtotal = items.reduce((acc: number, item: any) => acc + Number(item.totalPrice), 0);
 
       const sub = newSubtotal;
       const discount = Number(invoice.discountAmount) > 0 ? Number(invoice.discountAmount) : (sub * Number(invoice.discountPercent)) / 100;

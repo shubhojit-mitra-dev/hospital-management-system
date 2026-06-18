@@ -438,7 +438,7 @@ export class PharmacyController {
 
       const alerts = [];
       for (const m of medicines) {
-        const totalStock = m.inventory.reduce((acc, item) => acc + item.quantity, 0);
+        const totalStock = m.inventory.reduce((acc: number, item: any) => acc + item.quantity, 0);
         // Take standard reorder level from first batch or default 50
         const reorderLevel = m.inventory[0]?.reorderLevel ?? 50;
 
@@ -489,7 +489,7 @@ export class PharmacyController {
         orderBy: { expiryDate: 'asc' },
       });
 
-      const alerts = expiringBatches.map((b) => {
+      const alerts = expiringBatches.map((b: any) => {
         const days = Math.ceil((b.expiryDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
         return {
           medicine: {
@@ -577,7 +577,7 @@ export class PharmacyController {
               hospitalId,
             }
           });
-          const totalStock = invs.reduce((acc, item) => acc + item.quantity, 0);
+          const totalStock = invs.reduce((acc: number, item: any) => acc + item.quantity, 0);
           itemsWithStock.push({
             ...item,
             availableStock: totalStock,
@@ -630,12 +630,12 @@ export class PharmacyController {
             hospitalId,
           }
         });
-        const totalStock = invs.reduce((acc, i) => acc + i.quantity, 0);
+        const totalStock = invs.reduce((acc: number, i: any) => acc + i.quantity, 0);
         itemsWithStock.push({
           ...item,
           availableStock: totalStock,
           isAvailable: totalStock >= (item.quantity || 0),
-          batches: invs.map(i => ({ id: i.id, batchNumber: i.batchNumber, quantity: i.quantity, expiryDate: i.expiryDate }))
+          batches: invs.map((i: any) => ({ id: i.id, batchNumber: i.batchNumber, quantity: i.quantity, expiryDate: i.expiryDate }))
         });
       }
 
@@ -676,7 +676,7 @@ export class PharmacyController {
       let partialFulfilled = false;
 
       for (const item of items) {
-        const rxItem = rx.items.find((i) => i.id === item.prescriptionItemId);
+        const rxItem = rx.items.find((i: any) => i.id === item.prescriptionItemId);
         if (!rxItem) {
           return res.status(400).json({ error: `Prescription item ${item.prescriptionItemId} not found` });
         }
@@ -776,10 +776,10 @@ export class PharmacyController {
       await AuditService.recordLog({
         actorId: req.user?.id,
         actorRole: req.user?.role,
-        hospitalId,
+        hospitalId: hospitalId || undefined,
         action: 'DISPENSE_PRESCRIPTION',
         entityType: 'PRESCRIPTION',
-        entityId: id,
+        entityId: id as string,
         description: `Dispensed medicines for prescription ${rx.prescriptionNo} (Status: ${finalStatus})`,
         ipAddress: req.ip,
       });

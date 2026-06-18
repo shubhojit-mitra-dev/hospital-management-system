@@ -581,7 +581,7 @@ export class AppointmentController {
         },
       });
 
-      const events = appointments.map((apt) => {
+      const events = appointments.map((apt: any) => {
         // Color coding
         let color = '#FFC107'; // REQUESTED (amber)
         if (apt.status === 'CONFIRMED') color = '#2196F3'; // blue
@@ -647,10 +647,10 @@ export class AppointmentController {
 
       const stats = {
         total: queue.length,
-        waiting: queue.filter((q) => q.queueStatus === 'WAITING').length,
-        inProgress: queue.filter((q) => q.queueStatus === 'IN_PROGRESS').length,
-        completed: queue.filter((q) => q.queueStatus === 'DONE').length,
-        skipped: queue.filter((q) => q.queueStatus === 'SKIPPED').length,
+        waiting: queue.filter((q: any) => q.queueStatus === 'WAITING').length,
+        inProgress: queue.filter((q: any) => q.queueStatus === 'IN_PROGRESS').length,
+        completed: queue.filter((q: any) => q.queueStatus === 'DONE').length,
+        skipped: queue.filter((q: any) => q.queueStatus === 'SKIPPED').length,
       };
 
       return res.status(200).json({

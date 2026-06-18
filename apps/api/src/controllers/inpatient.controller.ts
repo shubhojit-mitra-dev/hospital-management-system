@@ -51,7 +51,7 @@ export class InpatientController {
         });
       }
 
-      await AuditService.log({
+      await AuditService.recordLog({
         hospitalId,
         actorId: req.user?.id,
         actorRole: req.user?.role,
@@ -59,7 +59,7 @@ export class InpatientController {
         entityType: 'Ward',
         entityId: wardId,
         description: `Created ward ${name} with ${totalBeds} beds.`,
-        req
+        ipAddress: req.ip
       });
 
       return res.status(201).json({ success: true, data: ward });
@@ -86,11 +86,11 @@ export class InpatientController {
       });
 
       // Calculate real-time bed statistics per ward
-      const wardsWithStats = wards.map(w => {
+      const wardsWithStats = wards.map((w: any) => {
         const total = w.beds.length;
-        const available = w.beds.filter(b => b.status === 'AVAILABLE' && b.isActive).length;
-        const occupied = w.beds.filter(b => b.status === 'OCCUPIED' && b.isActive).length;
-        const maintenance = w.beds.filter(b => b.status === 'MAINTENANCE' && b.isActive).length;
+        const available = w.beds.filter((b: any) => b.status === 'AVAILABLE' && b.isActive).length;
+        const occupied = w.beds.filter((b: any) => b.status === 'OCCUPIED' && b.isActive).length;
+        const maintenance = w.beds.filter((b: any) => b.status === 'MAINTENANCE' && b.isActive).length;
         
         return {
           ...w,
@@ -131,9 +131,9 @@ export class InpatientController {
       }
 
       const total = ward.beds.length;
-      const available = ward.beds.filter(b => b.status === 'AVAILABLE' && b.isActive).length;
-      const occupied = ward.beds.filter(b => b.status === 'OCCUPIED' && b.isActive).length;
-      const maintenance = ward.beds.filter(b => b.status === 'MAINTENANCE' && b.isActive).length;
+      const available = ward.beds.filter((b: any) => b.status === 'AVAILABLE' && b.isActive).length;
+      const occupied = ward.beds.filter((b: any) => b.status === 'OCCUPIED' && b.isActive).length;
+      const maintenance = ward.beds.filter((b: any) => b.status === 'MAINTENANCE' && b.isActive).length;
 
       const stats = {
         totalBeds: total,
@@ -367,7 +367,7 @@ export class InpatientController {
         }
       });
 
-      await AuditService.log({
+      await AuditService.recordLog({
         hospitalId,
         actorId: req.user?.id,
         actorRole: req.user?.role,
@@ -375,7 +375,7 @@ export class InpatientController {
         entityType: 'Admission',
         entityId: admissionId,
         description: `Admitted patient ${admission.patient.firstName} ${admission.patient.lastName} to ward ${admission.ward.name}, bed ${admission.bed.bedNumber}`,
-        req
+        ipAddress: req.ip
       });
 
       return res.status(201).json({ success: true, data: admission });
@@ -560,8 +560,8 @@ export class InpatientController {
       const updated = await prisma.admission.update({
         where: { id },
         data: {
-          wardId,
-          bedId,
+          wardId: toWardId,
+          bedId: toBedId,
           dailyRoomRate: ward.chargePerDay
         },
         include: {
@@ -570,15 +570,15 @@ export class InpatientController {
         }
       });
 
-      await AuditService.log({
-        hospitalId,
+      await AuditService.recordLog({
+        hospitalId: hospitalId || undefined,
         actorId: req.user?.id,
         actorRole: req.user?.role,
         action: 'TRANSFER_PATIENT_BED',
         entityType: 'Admission',
-        entityId: id,
+        entityId: id as string,
         description: `Transferred admission ${admission.admissionNumber} from bed ${admission.bedId} to bed ${toBedId}`,
-        req
+        ipAddress: req.ip
       });
 
       return res.status(200).json({ success: true, data: updated });
@@ -661,7 +661,7 @@ export class InpatientController {
 
         // Recalculate invoice totals
         const items = await prisma.invoiceItem.findMany({ where: { invoiceId: invoice.id } });
-        const subtotal = items.reduce((acc, it) => acc + Number(it.totalPrice), 0);
+        const subtotal = items.reduce((acc: number, it: any) => acc + Number(it.totalPrice), 0);
 
         // Finalize invoice status to PENDING
         await prisma.invoice.update({
@@ -676,15 +676,15 @@ export class InpatientController {
         });
       }
 
-      await AuditService.log({
-        hospitalId,
+      await AuditService.recordLog({
+        hospitalId: hospitalId || undefined,
         actorId: req.user?.id,
         actorRole: req.user?.role,
         action: 'DISCHARGE_PATIENT',
         entityType: 'Admission',
-        entityId: id,
+        entityId: id as string,
         description: `Discharged patient ${admission.patient.firstName} ${admission.patient.lastName} from ward ${admission.ward.name}`,
-        req
+        ipAddress: req.ip
       });
 
       return res.status(200).json({ success: true, data: updatedAdmission });
@@ -710,10 +710,10 @@ export class InpatientController {
         }
       });
 
-      const totalBeds = wards.reduce((acc, w) => acc + w.beds.length, 0);
-      const occupiedBeds = wards.reduce((acc, w) => acc + w.beds.filter(b => b.status === 'OCCUPIED').length, 0);
-      const availableBeds = wards.reduce((acc, w) => acc + w.beds.filter(b => b.status === 'AVAILABLE').length, 0);
-      const maintenanceBeds = wards.reduce((acc, w) => acc + w.beds.filter(b => b.status === 'MAINTENANCE').length, 0);
+      const totalBeds = wards.reduce((acc: number, w: any) => acc + w.beds.length, 0);
+      const occupiedBeds = wards.reduce((acc: number, w: any) => acc + w.beds.filter((b: any) => b.status === 'OCCUPIED').length, 0);
+      const availableBeds = wards.reduce((acc: number, w: any) => acc + w.beds.filter((b: any) => b.status === 'AVAILABLE').length, 0);
+      const maintenanceBeds = wards.reduce((acc: number, w: any) => acc + w.beds.filter((b: any) => b.status === 'MAINTENANCE').length, 0);
 
       const summary = {
         totalBeds,
@@ -727,15 +727,15 @@ export class InpatientController {
         success: true,
         data: {
           summary,
-          wards: wards.map(w => ({
+          wards: wards.map((w: any) => ({
             id: w.id,
             name: w.name,
             wardType: w.wardType,
             chargePerDay: w.chargePerDay,
             totalBeds: w.beds.length,
-            availableBeds: w.beds.filter(b => b.status === 'AVAILABLE').length,
-            occupiedBeds: w.beds.filter(b => b.status === 'OCCUPIED').length,
-            beds: w.beds.map(b => ({
+            availableBeds: w.beds.filter((b: any) => b.status === 'AVAILABLE').length,
+            occupiedBeds: w.beds.filter((b: any) => b.status === 'OCCUPIED').length,
+            beds: w.beds.map((b: any) => ({
               id: b.id,
               bedNumber: b.bedNumber,
               bedType: b.bedType,
@@ -804,7 +804,7 @@ export class InpatientController {
 
             // Update invoice totals
             const items = await prisma.invoiceItem.findMany({ where: { invoiceId: invoice.id } });
-            const subtotal = items.reduce((acc, it) => acc + Number(it.totalPrice), 0);
+            const subtotal = items.reduce((acc: number, it: any) => acc + Number(it.totalPrice), 0);
 
             await prisma.invoice.update({
               where: { id: invoice.id },

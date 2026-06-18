@@ -111,10 +111,10 @@ export class LabController {
       await AuditService.recordLog({
         actorId: req.user?.id,
         actorRole: req.user?.role,
-        hospitalId,
+        hospitalId: hospitalId || undefined,
         action: 'UPDATE_LAB_CATALOG_ITEM',
         entityType: 'LAB_TEST_CATALOG',
-        entityId: id,
+        entityId: id as string,
         description: `Updated lab test catalog item: ${existing.testName}`,
         ipAddress: req.ip,
       });
@@ -147,10 +147,10 @@ export class LabController {
       await AuditService.recordLog({
         actorId: req.user?.id,
         actorRole: req.user?.role,
-        hospitalId,
+        hospitalId: hospitalId || undefined,
         action: 'DELETE_LAB_CATALOG_ITEM',
         entityType: 'LAB_TEST_CATALOG',
-        entityId: id,
+        entityId: id as string,
         description: `Deactivated lab test catalog item: ${existing.testName}`,
         ipAddress: req.ip,
       });
@@ -367,10 +367,10 @@ export class LabController {
       await AuditService.recordLog({
         actorId: req.user?.id,
         actorRole: req.user?.role,
-        hospitalId,
+        hospitalId: hospitalId || undefined,
         action: 'COLLECT_LAB_SAMPLE',
         entityType: 'LAB_ORDER',
-        entityId: id,
+        entityId: id as string,
         description: `Marked sample collected for lab order ${order.orderNumber}`,
         ipAddress: req.ip,
       });
@@ -514,10 +514,10 @@ export class LabController {
       await AuditService.recordLog({
         actorId: req.user?.id,
         actorRole: req.user?.role,
-        hospitalId,
+        hospitalId: hospitalId || undefined,
         action: 'UPLOAD_LAB_RESULTS',
         entityType: 'LAB_ORDER',
-        entityId: id,
+        entityId: id as string,
         description: `Uploaded test results for lab order ${order.orderNumber} ${hasCritical ? '(CRITICAL VALUES DETECTED)' : ''}`,
         ipAddress: req.ip,
       });
@@ -531,13 +531,13 @@ export class LabController {
       // 1. Send Lab Report Ready to patient
       if (patientRecord?.userId) {
         await NotificationService.send({
-          hospitalId,
+          hospitalId: hospitalId || '',
           eventType: 'LAB_REPORT_READY',
           recipients: [patientRecord.userId],
           title: 'Lab Report Ready',
           body: `Your lab report for order ${order.orderNumber} is now ready for review.`,
           entityType: 'lab_order',
-          entityId: id,
+          entityId: id as string,
           actionUrl: `/my-labs`,
           templateData: {
             patientName: `${patientRecord.firstName} ${patientRecord.lastName}`,
@@ -546,20 +546,20 @@ export class LabController {
           }
         });
       }
-
+ 
       // 2. Critical Value warning trigger
       if (hasCritical) {
         console.log(`[ALERT] CRITICAL VALUE DETECTED for patient ID ${order.patientId} on test parameters:`, criticalParameters);
         
         if (order.doctor?.userId) {
           await NotificationService.send({
-            hospitalId,
+            hospitalId: hospitalId || '',
             eventType: 'CRITICAL_LAB_VALUE',
             recipients: [order.doctor.userId],
             title: `CRITICAL Lab Value Alert - ${order.orderNumber}`,
             body: `Critical lab results detected for patient ${patientRecord?.firstName || ''} ${patientRecord?.lastName || ''} on order ${order.orderNumber}. Please review immediately.`,
             entityType: 'lab_order',
-            entityId: id,
+            entityId: id as string,
             actionUrl: `/lab/orders/${id}`,
             priority: 'CRITICAL',
             templateData: {
@@ -607,10 +607,10 @@ export class LabController {
       await AuditService.recordLog({
         actorId: req.user?.id,
         actorRole: req.user?.role,
-        hospitalId,
+        hospitalId: hospitalId || undefined,
         action: 'REVIEW_LAB_ORDER',
         entityType: 'LAB_ORDER',
-        entityId: id,
+        entityId: id as string,
         description: `Doctor reviewed and approved lab order results: ${order.orderNumber}`,
         ipAddress: req.ip,
       });
@@ -650,10 +650,10 @@ export class LabController {
       await AuditService.recordLog({
         actorId: req.user?.id,
         actorRole: req.user?.role,
-        hospitalId,
+        hospitalId: hospitalId || undefined,
         action: 'CANCEL_LAB_ORDER',
         entityType: 'LAB_ORDER',
-        entityId: id,
+        entityId: id as string,
         description: `Cancelled lab order ${order.orderNumber}`,
         ipAddress: req.ip,
       });

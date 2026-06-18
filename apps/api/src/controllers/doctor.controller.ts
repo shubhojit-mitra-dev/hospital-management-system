@@ -66,7 +66,7 @@ export class DoctorController {
     const holidays = await prisma.holiday.findMany({
       where: { hospitalId: doctor.hospitalId },
     });
-    const isHoliday = holidays.some((h) => {
+    const isHoliday = holidays.some((h: any) => {
       const hDate = new Date(h.date);
       if (h.isRecurring) {
         return hDate.getMonth() === targetDate.getMonth() && hDate.getDate() === targetDate.getDate();
@@ -92,7 +92,7 @@ export class DoctorController {
       },
       select: { appointmentTime: true },
     });
-    const bookedTimes = new Set(bookedAppointments.map((a) => a.appointmentTime));
+    const bookedTimes = new Set(bookedAppointments.map((a: any) => a.appointmentTime));
 
     return allSlots.map((time) => {
       const parts = time.split(':').map(Number);

@@ -132,7 +132,7 @@ export class EmergencyController {
         where: { hospitalId, role: 'HOSPITAL_ADMIN' },
         select: { id: true }
       });
-      const adminIds = admins.map(a => a.id);
+      const adminIds = admins.map((a: any) => a.id);
       if (adminIds.length > 0) {
         await NotificationService.send({
           hospitalId,
@@ -183,7 +183,7 @@ export class EmergencyController {
         });
       }
 
-      await AuditService.log({
+      await AuditService.recordLog({
         hospitalId,
         actorId: req.user?.id,
         actorRole: req.user?.role,
@@ -191,7 +191,7 @@ export class EmergencyController {
         entityType: 'EmergencyCase',
         entityId: caseId,
         description: `Created emergency case ${caseNumber} for ${patientName || 'unregistered patient'}. Triage: ${triageLevel}`,
-        req
+        ipAddress: req.ip
       });
 
       return res.status(201).json({ success: true, data: emergencyCase });
@@ -228,14 +228,14 @@ export class EmergencyController {
       });
 
       // Stats calculator
-      const activeCases = cases.filter(c => c.status === 'ACTIVE');
+      const activeCases = cases.filter((c: any) => c.status === 'ACTIVE');
       const stats = {
         totalActive: activeCases.length,
-        immediate: activeCases.filter(c => c.triageLevel === 'IMMEDIATE').length,
-        emergent: activeCases.filter(c => c.triageLevel === 'EMERGENT').length,
-        urgent: activeCases.filter(c => c.triageLevel === 'URGENT').length,
-        lessUrgent: activeCases.filter(c => c.triageLevel === 'LESS_URGENT').length,
-        nonUrgent: activeCases.filter(c => c.triageLevel === 'NON_URGENT').length
+        immediate: activeCases.filter((c: any) => c.triageLevel === 'IMMEDIATE').length,
+        emergent: activeCases.filter((c: any) => c.triageLevel === 'EMERGENT').length,
+        urgent: activeCases.filter((c: any) => c.triageLevel === 'URGENT').length,
+        lessUrgent: activeCases.filter((c: any) => c.triageLevel === 'LESS_URGENT').length,
+        nonUrgent: activeCases.filter((c: any) => c.triageLevel === 'NON_URGENT').length
       };
 
       // Custom priority sorting: IMMEDIATE > EMERGENT > URGENT > LESS_URGENT > NON_URGENT
@@ -247,7 +247,7 @@ export class EmergencyController {
         'NON_URGENT': 1
       };
 
-      const sortedCases = cases.sort((a, b) => {
+      const sortedCases = cases.sort((a: any, b: any) => {
         if (a.status !== b.status) return a.status === 'ACTIVE' ? -1 : 1; // actives first
         return (priorityMap[b.triageLevel] || 0) - (priorityMap[a.triageLevel] || 0);
       });
@@ -440,15 +440,15 @@ export class EmergencyController {
         }
       }
 
-      await AuditService.log({
-        hospitalId,
+      await AuditService.recordLog({
+        hospitalId: hospitalId || undefined,
         actorId: req.user?.id,
         actorRole: req.user?.role,
         action: 'CLOSE_EMERGENCY_CASE',
         entityType: 'EmergencyCase',
-        entityId: id,
+        entityId: id as string,
         description: `Closed emergency case ${emgCase.caseNumber}. Disposition: ${disposition}`,
-        req
+        ipAddress: req.ip
       });
 
       return res.status(200).json({ success: true, data: updated });

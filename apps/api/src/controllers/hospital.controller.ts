@@ -53,7 +53,7 @@ export class HospitalController {
       const passwordHash = await bcrypt.hash(adminPassword, 10);
       const adminId = `usr_${ulid().toLowerCase()}`;
 
-      const result = await prisma.$transaction(async (tx) => {
+      const result = await prisma.$transaction(async (tx: any) => {
         const hospital = await tx.hospital.create({
           data: {
             id: hospitalId,

@@ -15,7 +15,8 @@ import {
   Phone,
   Heart,
   FileSpreadsheet,
-  Layers
+  Layers,
+  ChevronRight
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import api from '@/lib/axios';

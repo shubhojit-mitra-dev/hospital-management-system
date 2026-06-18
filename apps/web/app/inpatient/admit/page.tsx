@@ -7,7 +7,7 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import api from '@/lib/axios';
 import { cn } from '@/lib/utils';
 
-export default function AdmitPatientPage() {
+function AdmitPatientForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryWardId = searchParams.get('wardId') || '';
@@ -372,5 +372,18 @@ export default function AdmitPatientPage() {
 
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function AdmitPatientPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="flex flex-col items-center justify-center p-24 text-slate-500 gap-3">
+        <div className="h-8 w-8 rounded-full border-4 border-teal-500 border-t-transparent animate-spin"></div>
+        <span>Loading admission details...</span>
+      </div>
+    }>
+      <AdmitPatientForm />
+    </React.Suspense>
   );
 }
