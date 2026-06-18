@@ -20,7 +20,7 @@ export class EMRController {
   }
 
   static async upload(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context required' });
     }
@@ -92,7 +92,7 @@ export class EMRController {
 
   static async listByPatient(req: Request, res: Response) {
     const patientId = req.params.patientId as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     try {
       const records = await prisma.eMRRecord.findMany({
@@ -108,7 +108,7 @@ export class EMRController {
 
   static async download(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     try {
       const record = await prisma.eMRRecord.findFirst({
@@ -138,7 +138,7 @@ export class EMRController {
 
   static async semanticSearch(req: Request, res: Response) {
     const patientId = req.params.patientId as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     const query = req.query.query as string;
 
     try {
