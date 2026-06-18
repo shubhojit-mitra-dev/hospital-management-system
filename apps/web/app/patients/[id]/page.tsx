@@ -237,7 +237,7 @@ export default function PatientDetailPage() {
   const updateAllergen = (idx: number, field: string, val: string) => {
     setHistoryForm((prev) => {
       const updated = [...prev.allergies];
-      updated[idx] = { ...updated[idx], [field]: val };
+      updated[idx] = { ...updated[idx], [field]: val } as any;
       return { ...prev, allergies: updated };
     });
   };
@@ -259,7 +259,7 @@ export default function PatientDetailPage() {
   const updateCondition = (idx: number, field: string, val: any) => {
     setHistoryForm((prev) => {
       const updated = [...prev.conditions];
-      updated[idx] = { ...updated[idx], [field]: val };
+      updated[idx] = { ...updated[idx], [field]: val } as any;
       return { ...prev, conditions: updated };
     });
   };
@@ -281,7 +281,7 @@ export default function PatientDetailPage() {
   const updateMedication = (idx: number, field: string, val: string) => {
     setHistoryForm((prev) => {
       const updated = [...prev.medications];
-      updated[idx] = { ...updated[idx], [field]: val };
+      updated[idx] = { ...updated[idx], [field]: val } as any;
       return { ...prev, medications: updated };
     });
   };
