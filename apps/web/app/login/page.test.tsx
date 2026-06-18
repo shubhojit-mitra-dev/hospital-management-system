@@ -11,6 +11,9 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
   }),
+  useSearchParams: () => ({
+    get: vi.fn(),
+  }),
 }));
 
 describe('LoginPage', () => {
@@ -61,7 +64,7 @@ describe('LoginPage', () => {
       });
       expect(useAuthStore.getState().isAuthenticated).toBe(true);
       expect(useAuthStore.getState().accessToken).toBe('test-token');
-      expect(mockPush).toHaveBeenCalledWith('/');
+      expect(mockPush).toHaveBeenCalledWith('/patients');
     });
   });
 

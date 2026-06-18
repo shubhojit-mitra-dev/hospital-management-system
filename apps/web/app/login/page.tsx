@@ -48,6 +48,8 @@ function LoginContent() {
         router.push('/super-admin/hospitals');
       } else if (user.role === 'HOSPITAL_ADMIN') {
         router.push('/admin/departments');
+      } else if (['RECEPTIONIST', 'DOCTOR', 'NURSE'].includes(user.role)) {
+        router.push('/patients');
       } else {
         router.push('/unauthorized');
       }
