@@ -8,6 +8,8 @@ import authRouter from './routes/auth.routes.js';
 import adminRouter from './routes/admin.routes.js';
 import hospitalRouter from './routes/hospital.routes.js';
 import patientRouter from './routes/patient.routes.js';
+import doctorRouter from './routes/doctor.routes.js';
+import staffRouter from './routes/staff.routes.js';
 
 export const app: Express = express();
 
@@ -25,6 +27,8 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/admin/users', adminRouter);
 app.use('/api/v1/hospitals', hospitalRouter);
 app.use('/api/v1/patients', patientRouter);
+app.use('/api/v1/doctors', doctorRouter);
+app.use('/api/v1/staff', staffRouter);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
