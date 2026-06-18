@@ -7,7 +7,7 @@ export class InpatientController {
   
   // --- Wards ---
   static async createWard(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -70,7 +70,7 @@ export class InpatientController {
   }
 
   static async listWards(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -112,8 +112,8 @@ export class InpatientController {
   }
 
   static async getWardById(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const ward = await prisma.ward.findFirst({
@@ -152,8 +152,8 @@ export class InpatientController {
 
   // --- Beds ---
   static async addBedsToWard(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params; // Ward ID
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string; // Ward ID
     const { beds } = req.body; // Array of bed objects { bedNumber, bedType }
 
     if (!beds || !Array.isArray(beds)) {
@@ -197,8 +197,9 @@ export class InpatientController {
   }
 
   static async updateBedStatus(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id, bedId } = req.params; // Ward ID and Bed ID
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
+    const bedId = req.params.bedId as string; // Ward ID and Bed ID
     const { status } = req.body; // AVAILABLE | MAINTENANCE | RESERVED
 
     if (!status) {
@@ -232,7 +233,7 @@ export class InpatientController {
 
   // --- Admissions ---
   static async createAdmission(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -386,12 +387,14 @@ export class InpatientController {
   }
 
   static async listAdmissions(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
 
-    const { status, patientId, wardId } = req.query;
+    const status = req.query.status as string | undefined;
+    const patientId = req.query.patientId as string | undefined;
+    const wardId = req.query.wardId as string | undefined;
 
     try {
       const whereClause: any = { hospitalId };
@@ -419,8 +422,8 @@ export class InpatientController {
   }
 
   static async getAdmissionById(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const admission = await prisma.admission.findFirst({
@@ -460,8 +463,8 @@ export class InpatientController {
   }
 
   static async recordRoundNote(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params; // Admission ID
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string; // Admission ID
     const { noteType, notes } = req.body;
 
     if (!noteType || !notes) {
@@ -497,8 +500,8 @@ export class InpatientController {
   }
 
   static async transferPatient(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params; // Admission ID
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string; // Admission ID
     const { toWardId, toBedId, reason } = req.body;
 
     if (!toWardId || !toBedId) {
@@ -589,8 +592,8 @@ export class InpatientController {
   }
 
   static async dischargePatient(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params; // Admission ID
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string; // Admission ID
     const { dischargeDiagnosis, dischargeCondition, dischargeInstructions } = req.body;
 
     if (!dischargeDiagnosis || !dischargeCondition) {
@@ -695,7 +698,7 @@ export class InpatientController {
   }
 
   static async getBedAvailability(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -752,7 +755,7 @@ export class InpatientController {
 
   // --- Manual room billing simulation ---
   static async triggerDailyBilling(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }

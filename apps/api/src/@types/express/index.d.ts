@@ -1,7 +1,7 @@
 export interface UserPayload {
   id: string;
   role: string;
-  hospitalId: string | null;
+  hospitalId: string;
 }
 
 

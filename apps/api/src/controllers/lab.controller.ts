@@ -7,7 +7,7 @@ import { NotificationService } from '../services/notification.service.js';
 export class LabController {
   // --- Lab Test Catalog ---
   static async listCatalog(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -44,7 +44,7 @@ export class LabController {
   }
 
   static async createCatalogItem(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -91,8 +91,8 @@ export class LabController {
   }
 
   static async updateCatalogItem(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const existing = await prisma.labTestCatalog.findFirst({
@@ -127,8 +127,8 @@ export class LabController {
   }
 
   static async deleteCatalogItem(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const existing = await prisma.labTestCatalog.findFirst({
@@ -164,7 +164,7 @@ export class LabController {
 
   // --- Lab Orders ---
   static async createOrder(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -266,12 +266,14 @@ export class LabController {
   }
 
   static async listOrders(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
 
-    const { status, patientId, priority } = req.query;
+    const status = req.query.status as string | undefined;
+    const patientId = req.query.patientId as string | undefined;
+    const priority = req.query.priority as string | undefined;
 
     try {
       const whereClause: any = {
@@ -309,8 +311,8 @@ export class LabController {
   }
 
   static async getOrderById(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const order = await prisma.labOrder.findFirst({
@@ -338,8 +340,8 @@ export class LabController {
   }
 
   static async collectSample(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const order = await prisma.labOrder.findFirst({
@@ -383,8 +385,8 @@ export class LabController {
   }
 
   static async startProcessing(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const order = await prisma.labOrder.findFirst({
@@ -415,8 +417,8 @@ export class LabController {
   }
 
   static async uploadResults(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
     const { items, reportFileKey } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -583,8 +585,8 @@ export class LabController {
   }
 
   static async reviewOrder(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const order = await prisma.labOrder.findFirst({
@@ -623,8 +625,8 @@ export class LabController {
   }
 
   static async cancelOrder(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const order = await prisma.labOrder.findFirst({
@@ -666,8 +668,8 @@ export class LabController {
   }
 
   static async getPatientHistory(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { patientId } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const patientId = req.params.patientId as string;
 
     try {
       const orders = await prisma.labOrder.findMany({

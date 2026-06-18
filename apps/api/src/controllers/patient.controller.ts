@@ -5,7 +5,7 @@ import { AuditService } from '../services/audit.service.js';
 
 export class PatientController {
   static async create(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -138,7 +138,7 @@ export class PatientController {
   }
 
   static async list(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -195,7 +195,7 @@ export class PatientController {
   }
 
   static async getById(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     const id = req.params.id as string;
 
     try {
@@ -226,7 +226,7 @@ export class PatientController {
   }
 
   static async update(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     const id = req.params.id as string;
     const updateData = { ...req.body };
 
@@ -275,7 +275,7 @@ export class PatientController {
   }
 
   static async delete(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     const id = req.params.id as string;
 
     try {
@@ -314,7 +314,7 @@ export class PatientController {
   }
 
   static async getMedicalHistory(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     const id = req.params.id as string;
 
     try {
@@ -334,7 +334,7 @@ export class PatientController {
   }
 
   static async updateMedicalHistory(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     const id = req.params.id as string;
     const { allergies, conditions, surgeries, medications, smokingStatus, alcoholStatus, exerciseFrequency, familyHistory } = req.body;
 
@@ -381,7 +381,7 @@ export class PatientController {
   }
 
   static async getVitals(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     const id = req.params.id as string;
 
     try {
@@ -398,7 +398,7 @@ export class PatientController {
   }
 
   static async createVitals(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     const id = req.params.id as string;
     const { appointmentId, weightKg, heightCm, bloodPressureSystolic, bloodPressureDiastolic, pulseBpm, temperatureC, spo2Percent, respiratoryRate, notes } = req.body;
 
@@ -457,7 +457,7 @@ export class PatientController {
   }
 
   static async getTimeline(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     const id = req.params.id as string;
 
     try {

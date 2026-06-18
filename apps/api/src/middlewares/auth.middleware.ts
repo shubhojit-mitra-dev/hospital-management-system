@@ -18,7 +18,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     req.user = {
       id: decoded.id,
       role: decoded.role,
-      hospitalId: decoded.hospitalId,
+      hospitalId: decoded.hospitalId || '',
     };
     return next();
   } catch (error) {

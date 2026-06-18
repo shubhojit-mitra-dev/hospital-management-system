@@ -6,7 +6,7 @@ import { AuditService } from '../services/audit.service.js';
 export class PharmacyController {
   // --- Medicine Catalog ---
   static async listMedicines(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -60,7 +60,7 @@ export class PharmacyController {
   }
 
   static async createMedicine(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -109,8 +109,8 @@ export class PharmacyController {
   }
 
   static async getMedicineById(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const medicine = await prisma.medicine.findFirst({
@@ -134,8 +134,8 @@ export class PharmacyController {
   }
 
   static async updateMedicine(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const existing = await prisma.medicine.findFirst({
@@ -159,8 +159,8 @@ export class PharmacyController {
   }
 
   static async deleteMedicine(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const existing = await prisma.medicine.findFirst({
@@ -185,7 +185,7 @@ export class PharmacyController {
 
   // --- Suppliers ---
   static async listSuppliers(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -204,7 +204,7 @@ export class PharmacyController {
   }
 
   static async createSupplier(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -239,8 +239,8 @@ export class PharmacyController {
   }
 
   static async updateSupplier(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const existing = await prisma.supplier.findFirst({
@@ -265,7 +265,7 @@ export class PharmacyController {
 
   // --- Inventory Management ---
   static async listInventory(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -288,7 +288,7 @@ export class PharmacyController {
   }
 
   static async createInventoryBatch(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -372,8 +372,8 @@ export class PharmacyController {
   }
 
   static async adjustInventoryBatch(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
     const { quantity } = req.body; // New absolute quantity
 
     if (quantity === undefined) {
@@ -420,7 +420,7 @@ export class PharmacyController {
   }
 
   static async getLowStockAlerts(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -465,7 +465,7 @@ export class PharmacyController {
   }
 
   static async getExpiringAlerts(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -512,7 +512,7 @@ export class PharmacyController {
   }
 
   static async getTransactions(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -539,7 +539,7 @@ export class PharmacyController {
 
   // --- Prescription Fulfillment ---
   static async listPrescriptions(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -598,8 +598,8 @@ export class PharmacyController {
   }
 
   static async getPrescriptionById(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const rx = await prisma.prescription.findFirst({
@@ -653,8 +653,8 @@ export class PharmacyController {
   }
 
   static async dispensePrescription(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
     const { items, notes } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {

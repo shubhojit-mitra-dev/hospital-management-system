@@ -6,7 +6,7 @@ import { AuditService } from '../services/audit.service.js';
 export class BillingController {
   // --- Invoices ---
   static async createInvoice(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -76,12 +76,13 @@ export class BillingController {
   }
 
   static async listInvoices(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
 
-    const { status, patientId } = req.query;
+    const status = req.query.status as string | undefined;
+    const patientId = req.query.patientId as string | undefined;
 
     try {
       const whereClause: any = { hospitalId };
@@ -105,8 +106,8 @@ export class BillingController {
   }
 
   static async getInvoiceById(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const invoice = await prisma.invoice.findFirst({
@@ -131,8 +132,8 @@ export class BillingController {
   }
 
   static async updateInvoice(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
     const { discountAmount, discountPercent, taxPercent, notes, status } = req.body;
 
     try {
@@ -181,8 +182,8 @@ export class BillingController {
   }
 
   static async finalizeInvoice(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const invoice = await prisma.invoice.findFirst({
@@ -213,8 +214,8 @@ export class BillingController {
   }
 
   static async addInvoiceItem(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params; // Invoice ID
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string; // Invoice ID
     const { itemType, description, quantity, unitPrice, referenceType, referenceId } = req.body;
 
     if (!description || !unitPrice) {
@@ -282,8 +283,9 @@ export class BillingController {
   }
 
   static async removeInvoiceItem(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id, itemId } = req.params; // Invoice ID and Item ID
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
+    const itemId = req.params.itemId as string; // Invoice ID and Item ID
 
     try {
       const invoice = await prisma.invoice.findFirst({
@@ -336,8 +338,8 @@ export class BillingController {
   }
 
   static async cancelInvoice(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const invoice = await prisma.invoice.findFirst({
@@ -363,8 +365,8 @@ export class BillingController {
   }
 
   static async getPatientInvoiceHistory(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { patientId } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const patientId = req.params.patientId as string;
 
     try {
       const invoices = await prisma.invoice.findMany({
@@ -382,7 +384,7 @@ export class BillingController {
 
   // --- Payments ---
   static async recordCashPayment(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -444,7 +446,7 @@ export class BillingController {
   }
 
   static async initiateGatewayPayment(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     const { invoiceId, amount, paymentMethod } = req.body;
 
     if (!invoiceId || !amount) {
@@ -485,7 +487,7 @@ export class BillingController {
   }
 
   static async verifyGatewayPayment(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     const { invoiceId, amount, gatewayOrderId, gatewayPaymentId, gatewaySignature } = req.body;
 
     if (!invoiceId || !amount || !gatewayOrderId || !gatewayPaymentId) {
@@ -546,8 +548,8 @@ export class BillingController {
   }
 
   static async getPaymentsForInvoice(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { invoiceId } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const invoiceId = req.params.invoiceId as string;
 
     try {
       const payments = await prisma.payment.findMany({
@@ -563,7 +565,7 @@ export class BillingController {
   }
 
   static async initiateRefund(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     const { paymentId, refundAmount, reason } = req.body;
 
     if (!paymentId || !refundAmount || !reason) {

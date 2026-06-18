@@ -5,7 +5,7 @@ import { AuditService } from '../services/audit.service.js';
 
 export class StaffController {
   static async create(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context required' });
     }
@@ -75,7 +75,7 @@ export class StaffController {
   }
 
   static async list(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context required' });
     }
@@ -135,7 +135,7 @@ export class StaffController {
 
   static async getById(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
 
     try {
       const staff = await prisma.staff.findFirst({
@@ -172,7 +172,7 @@ export class StaffController {
 
   static async update(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
     const updateData = { ...req.body };
 
     try {
@@ -217,7 +217,7 @@ export class StaffController {
 
   static async delete(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId || undefined;
+    const hospitalId = req.user?.hospitalId as string;
 
     try {
       const staff = await prisma.staff.findFirst({

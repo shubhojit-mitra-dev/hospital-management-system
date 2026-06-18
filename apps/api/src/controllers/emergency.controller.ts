@@ -7,7 +7,7 @@ import { NotificationService } from '../services/notification.service.js';
 export class EmergencyController {
 
   static async createEmergencyCase(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -202,7 +202,7 @@ export class EmergencyController {
   }
 
   static async listActiveEmergencies(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -266,8 +266,8 @@ export class EmergencyController {
   }
 
   static async getEmergencyCaseById(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
 
     try {
       const emgCase = await prisma.emergencyCase.findFirst({
@@ -296,8 +296,8 @@ export class EmergencyController {
   }
 
   static async updateTriageLevel(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
     const { triageLevel } = req.body;
 
     if (!triageLevel) {
@@ -326,8 +326,8 @@ export class EmergencyController {
   }
 
   static async assignDoctor(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
     const { attendingDoctorId, assignedNurseId } = req.body;
 
     try {
@@ -353,8 +353,8 @@ export class EmergencyController {
   }
 
   static async logAction(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params; // Case ID
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string; // Case ID
     const { actionType, description } = req.body;
 
     if (!actionType || !description) {
@@ -386,8 +386,8 @@ export class EmergencyController {
   }
 
   static async closeEmergencyCase(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
-    const { id } = req.params;
+    const hospitalId = req.user?.hospitalId as string;
+    const id = req.params.id as string;
     const { disposition, admissionId, notes } = req.body;
 
     if (!disposition) {
@@ -460,7 +460,7 @@ export class EmergencyController {
 
   // --- Duty Roster ---
   static async getDutyRoster(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
@@ -483,7 +483,7 @@ export class EmergencyController {
   }
 
   static async upsertDutyRoster(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId as string;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context is required' });
     }
