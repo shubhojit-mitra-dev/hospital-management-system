@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: ankane/pgvector
     container_name: hms-postgres
     environment:
       POSTGRES_DB: hms_db
