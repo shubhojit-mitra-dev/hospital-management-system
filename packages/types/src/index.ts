@@ -271,5 +271,17 @@ export const createDutyRosterSchema = z.object({
 });
 export type CreateDutyRosterRequest = z.infer<typeof createDutyRosterSchema>;
 
+// --- Notifications System ---
+export const updateNotificationPreferencesSchema = z.object({
+  emailEnabled: z.boolean().optional(),
+  smsEnabled: z.boolean().optional(),
+  inAppEnabled: z.boolean().optional(),
+  quietHoursEnabled: z.boolean().optional(),
+  quietStart: z.string().optional(),
+  quietEnd: z.string().optional(),
+  eventPreferences: z.any().optional() // Handles dynamic JSON map preferences
+});
+export type UpdateNotificationPreferencesRequest = z.infer<typeof updateNotificationPreferencesSchema>;
+
 export * from './permissions.js';
 

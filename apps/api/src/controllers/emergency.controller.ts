@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ulid } from 'ulid';
 import { prisma } from '../config/db.js';
 import { AuditService } from '../services/audit.service.js';
+import { NotificationService } from '../services/notification.service.js';
 
 export class EmergencyController {
 
@@ -105,12 +106,45 @@ export class EmergencyController {
         }
       });
 
-      // 4. Mock notifications & Twilio SMS triggers (Level 1/2 cases)
-      if (['IMMEDIATE', 'EMERGENT'].includes(triageLevel)) {
-        console.log(`[SOCKET BROADCAST] BROADCASTING EMERGENCY: Level 1 case EMG-new_case: ${caseNumber} - ${chiefComplaint}`);
-        if (onCallDoctor?.user?.phone) {
-          console.log(`[SMS DISPATCH - TWILIO MOCK] Sending SMS to ${onCallDoctor.user.phone}: EMERGENCY ALERT: You are assigned to Case ${caseNumber}. Patient: ${chiefComplaint}. ESI: LEVEL 1. Report to ER immediately.`);
-        }
+      // 4. Dispatch system notifications (Email, SMS, In-App)
+      if (attendingDoctorId) {
+        await NotificationService.send({
+          hospitalId,
+          eventType: 'EMERGENCY_ASSIGNED',
+          recipients: [attendingDoctorId],
+          title: `Emergency Assigned: ${caseNumber}`,
+          body: `You are assigned to Case ${caseNumber}. Complaint: ${chiefComplaint}. ESI Level: ${triageLevel}. Please check the emergency board.`,
+          entityType: 'emergency',
+          entityId: caseId,
+          actionUrl: `/emergency/${caseId}`,
+          priority: 'CRITICAL',
+          templateData: {
+            caseNumber,
+            triageLevel,
+            chiefComplaint,
+            broughtBy: broughtBy || 'Self'
+          }
+        });
+      }
+
+      // Notify hospital administrators
+      const admins = await prisma.user.findMany({
+        where: { hospitalId, role: 'HOSPITAL_ADMIN' },
+        select: { id: true }
+      });
+      const adminIds = admins.map(a => a.id);
+      if (adminIds.length > 0) {
+        await NotificationService.send({
+          hospitalId,
+          eventType: 'EMERGENCY_ACTIVE',
+          recipients: adminIds,
+          title: `Active ER Case: ${caseNumber}`,
+          body: `Emergency Intake registered - Case: ${caseNumber}. ESI: ${triageLevel}. Complaint: ${chiefComplaint}.`,
+          entityType: 'emergency',
+          entityId: caseId,
+          actionUrl: `/emergency/${caseId}`,
+          priority: triageLevel === 'IMMEDIATE' ? 'CRITICAL' : 'HIGH'
+        });
       }
 
       // 5. Create draft invoice for emergency stay (if registered patient)

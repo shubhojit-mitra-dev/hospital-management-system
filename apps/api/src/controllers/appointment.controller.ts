@@ -3,6 +3,7 @@ import { ulid } from 'ulid';
 import { prisma } from '../config/db.js';
 import { DoctorController } from './doctor.controller.js';
 import { AuditService } from '../services/audit.service.js';
+import { NotificationService } from '../services/notification.service.js';
 
 export class AppointmentController {
   static async book(req: Request, res: Response) {
@@ -107,6 +108,39 @@ export class AppointmentController {
         ipAddress: req.ip,
       });
 
+      // Dispatch notifications
+      if (appointment.patient?.userId) {
+        await NotificationService.send({
+          hospitalId,
+          eventType: 'APPOINTMENT_BOOKED',
+          recipients: [appointment.patient.userId],
+          title: 'Appointment Booked Successfully',
+          body: `Your appointment with Dr. ${appointment.doctor.user.firstName} ${appointment.doctor.user.lastName} has been booked for ${appointmentDate} at ${appointmentTime}. (Token #${tokenNumber})`,
+          entityType: 'appointment',
+          entityId: id,
+          actionUrl: `/appointments`,
+          templateData: {
+            doctorName: `Dr. ${appointment.doctor.user.firstName} ${appointment.doctor.user.lastName}`,
+            date: targetDate.toLocaleDateString(),
+            time: appointmentTime,
+            tokenNumber: tokenNumber.toString()
+          }
+        });
+      }
+
+      if (appointment.doctor?.userId) {
+        await NotificationService.send({
+          hospitalId,
+          eventType: 'NEW_APPOINTMENT',
+          recipients: [appointment.doctor.userId],
+          title: 'New Appointment Assigned',
+          body: `A new appointment has been booked by ${appointment.patient.firstName} ${appointment.patient.lastName} for ${appointmentDate} at ${appointmentTime}. (Token #${tokenNumber})`,
+          entityType: 'appointment',
+          entityId: id,
+          actionUrl: `/doctor/schedule`
+        });
+      }
+
       return res.status(201).json(appointment);
     } catch (err) {
       console.error(err);
@@ -210,6 +244,14 @@ export class AppointmentController {
       const updated = await prisma.appointment.update({
         where: { id },
         data: { status: 'CONFIRMED' },
+        include: {
+          patient: true,
+          doctor: {
+            include: {
+              user: true,
+            },
+          },
+        },
       });
 
       await AuditService.recordLog({
@@ -222,6 +264,20 @@ export class AppointmentController {
         description: `Confirmed appointment id ${id}`,
         ipAddress: req.ip,
       });
+
+      // Dispatch notifications
+      if (updated.patient?.userId) {
+        await NotificationService.send({
+          hospitalId: hospitalId as string,
+          eventType: 'APPOINTMENT_CONFIRMED',
+          recipients: [updated.patient.userId],
+          title: 'Appointment Confirmed',
+          body: `Your appointment with Dr. ${updated.doctor.user.firstName} ${updated.doctor.user.lastName} on ${updated.appointmentDate.toLocaleDateString()} at ${updated.appointmentTime} is confirmed. (Token #${updated.tokenNumber})`,
+          entityType: 'appointment',
+          entityId: id,
+          actionUrl: `/appointments`
+        });
+      }
 
       return res.status(200).json(updated);
     } catch (err) {
@@ -336,6 +392,14 @@ export class AppointmentController {
           cancelledBy: req.user?.id,
           cancellationReason: reason,
         },
+        include: {
+          patient: true,
+          doctor: {
+            include: {
+              user: true,
+            },
+          },
+        },
       });
 
       // Update queue status to skipped/done
@@ -354,6 +418,33 @@ export class AppointmentController {
         description: `Cancelled appointment id ${id} (Reason: ${reason || 'None'})`,
         ipAddress: req.ip,
       });
+
+      // Dispatch notifications
+      if (updated.patient?.userId) {
+        await NotificationService.send({
+          hospitalId: hospitalId as string,
+          eventType: 'APPOINTMENT_CANCELLED',
+          recipients: [updated.patient.userId],
+          title: 'Appointment Cancelled',
+          body: `Your appointment with Dr. ${updated.doctor.user.firstName} ${updated.doctor.user.lastName} scheduled for ${updated.appointmentDate.toLocaleDateString()} has been cancelled. Reason: ${reason || 'Not specified'}.`,
+          entityType: 'appointment',
+          entityId: id,
+          actionUrl: `/appointments`
+        });
+      }
+
+      if (updated.doctor?.userId) {
+        await NotificationService.send({
+          hospitalId: hospitalId as string,
+          eventType: 'APPOINTMENT_CANCELLED_DOCTOR',
+          recipients: [updated.doctor.userId],
+          title: 'Appointment Cancelled',
+          body: `The appointment for ${updated.patient.firstName} ${updated.patient.lastName} on ${updated.appointmentDate.toLocaleDateString()} at ${updated.appointmentTime} has been cancelled.`,
+          entityType: 'appointment',
+          entityId: id,
+          actionUrl: `/doctor/schedule`
+        });
+      }
 
       return res.status(200).json(updated);
     } catch (err) {

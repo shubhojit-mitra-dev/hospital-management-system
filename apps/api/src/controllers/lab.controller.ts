@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ulid } from 'ulid';
 import { prisma } from '../config/db.js';
 import { AuditService } from '../services/audit.service.js';
+import { NotificationService } from '../services/notification.service.js';
 
 export class LabController {
   // --- Lab Test Catalog ---
@@ -521,11 +522,53 @@ export class LabController {
         ipAddress: req.ip,
       });
 
-      // Critical Value warning trigger
+      // Fetch patient userId
+      const patientRecord = await prisma.patient.findUnique({
+        where: { id: order.patientId },
+        select: { userId: true, firstName: true, lastName: true }
+      });
+
+      // 1. Send Lab Report Ready to patient
+      if (patientRecord?.userId) {
+        await NotificationService.send({
+          hospitalId,
+          eventType: 'LAB_REPORT_READY',
+          recipients: [patientRecord.userId],
+          title: 'Lab Report Ready',
+          body: `Your lab report for order ${order.orderNumber} is now ready for review.`,
+          entityType: 'lab_order',
+          entityId: id,
+          actionUrl: `/my-labs`,
+          templateData: {
+            patientName: `${patientRecord.firstName} ${patientRecord.lastName}`,
+            orderNumber: order.orderNumber,
+            testName: items.map((it: any) => it.testName || 'Lab Test').join(', ')
+          }
+        });
+      }
+
+      // 2. Critical Value warning trigger
       if (hasCritical) {
-        // Here we would emit to Socket.io or trigger notification service.
-        // We will log a console log or mock event.
         console.log(`[ALERT] CRITICAL VALUE DETECTED for patient ID ${order.patientId} on test parameters:`, criticalParameters);
+        
+        if (order.doctor?.userId) {
+          await NotificationService.send({
+            hospitalId,
+            eventType: 'CRITICAL_LAB_VALUE',
+            recipients: [order.doctor.userId],
+            title: `CRITICAL Lab Value Alert - ${order.orderNumber}`,
+            body: `Critical lab results detected for patient ${patientRecord?.firstName || ''} ${patientRecord?.lastName || ''} on order ${order.orderNumber}. Please review immediately.`,
+            entityType: 'lab_order',
+            entityId: id,
+            actionUrl: `/lab/orders/${id}`,
+            priority: 'CRITICAL',
+            templateData: {
+              patientName: `${patientRecord?.firstName || ''} ${patientRecord?.lastName || ''}`,
+              orderNumber: order.orderNumber,
+              criticalAlert: 'YES'
+            }
+          });
+        }
       }
 
       return res.status(200).json({

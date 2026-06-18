@@ -23,6 +23,7 @@ import { useAuthStore } from '@/store/authStore';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { cn } from '@/lib/utils';
 import api from '@/lib/axios';
+import { NotificationBell } from './NotificationBell';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -353,6 +354,7 @@ export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps
             </div>
             
             <div className="flex items-center gap-3">
+              <NotificationBell />
               <div className="hidden sm:flex flex-col text-right">
                 <span className="text-xs font-bold text-slate-800">{user?.firstName} {user?.lastName}</span>
                 <span className="text-[9px] font-bold text-teal-600 uppercase tracking-wider">{roleDisplay}</span>

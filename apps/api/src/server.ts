@@ -19,6 +19,7 @@ import pharmacyRouter from './routes/pharmacy.routes.js';
 import billingRouter from './routes/billing.routes.js';
 import inpatientRouter from './routes/inpatient.routes.js';
 import emergencyRouter from './routes/emergency.routes.js';
+import notificationRouter from './routes/notification.routes.js';
 
 export const app: Express = express();
 
@@ -47,6 +48,7 @@ app.use('/api/v1/pharmacy', pharmacyRouter);
 app.use('/api/v1/billing', billingRouter);
 app.use('/api/v1/inpatient', inpatientRouter);
 app.use('/api/v1/emergency', emergencyRouter);
+app.use('/api/v1/notifications', notificationRouter);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });

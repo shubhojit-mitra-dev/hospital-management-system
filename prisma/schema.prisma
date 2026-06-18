@@ -50,6 +50,7 @@ model Hospital {
   admissionNotes  AdmissionNote[]
   emergencyCases  EmergencyCase[]
   dutyRoster      DutyRoster[]
+  notifications   Notification[]
 }
 
 model User {
@@ -101,6 +102,8 @@ model User {
   nurseEmergencyCases     EmergencyCase[]  @relation("EmergencyNurse")
   performedEmergencyActions EmergencyAction[]
   dutyRosters             DutyRoster[]
+  notifications           Notification[]
+  notificationPreference  NotificationPreference?
 }
 
 model RefreshToken {
@@ -1084,3 +1087,46 @@ model DutyRoster {
   @@unique([userId, shiftDate, shiftType])
   @@map("duty_roster")
 }
+
+model Notification {
+  id              String    @id @db.Text
+  hospitalId      String    @map("hospital_id")
+  userId          String    @map("user_id")
+  eventType       String    @map("event_type")
+  title           String
+  body            String
+  entityType      String?   @map("entity_type")
+  entityId        String?   @map("entity_id")
+  actionUrl       String?   @map("action_url")
+  isRead          Boolean   @default(false) @map("is_read")
+  readAt          DateTime? @map("read_at")
+  channels        String[]  @default([])
+  deliveredAt     Json      @default("{}") @map("delivered_at")
+  failedChannels  String[]  @default([]) @map("failed_channels")
+  priority        String    @default("NORMAL")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  expiresAt       DateTime? @map("expires_at")
+
+  hospital        Hospital  @relation(fields: [hospitalId], references: [id])
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id                 String   @id @db.Text
+  userId             String   @unique @map("user_id")
+  emailEnabled       Boolean  @default(true) @map("email_enabled")
+  smsEnabled         Boolean  @default(true) @map("sms_enabled")
+  inAppEnabled       Boolean  @default(true) @map("in_app_enabled")
+  eventPreferences   Json     @default("{}") @map("event_preferences")
+  quietHoursEnabled  Boolean  @default(false) @map("quiet_hours_enabled")
+  quietStart         String   @default("22:00") @map("quiet_start")
+  quietEnd           String   @default("07:00") @map("quiet_end")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
