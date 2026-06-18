@@ -44,6 +44,10 @@ model Hospital {
   invoices        Invoice[]
   payments        Payment[]
   refunds         Refund[]
+  wards           Ward[]
+  beds            Bed[]
+  admissions      Admission[]
+  admissionNotes  AdmissionNote[]
 }
 
 model User {
@@ -87,6 +91,9 @@ model User {
   createdInvoices     Invoice[]         @relation("InvoiceCreator")
   collectedPayments   Payment[]         @relation("PaymentCollector")
   initiatedRefunds    Refund[]          @relation("RefundInitiator")
+  primaryNursingAdmissions Admission[]      @relation("PrimaryNurse")
+  authoredAdmissionNotes   AdmissionNote[]  @relation("NoteAuthor")
+  transferredAdmissions    AdmissionTransfer[] @relation("TransferPerformer")
 }
 
 model RefreshToken {
@@ -152,6 +159,8 @@ model Department {
   staff        Staff[]
   appointments Appointment[]
   doctorDepartments DoctorDepartment[]
+  wards        Ward[]
+  admissions   Admission[]
 
   @@unique([hospitalId, code])
 }
@@ -213,6 +222,7 @@ model Patient {
   labResults        LabResult[]
   invoices          Invoice[]
   payments          Payment[]
+  admissions        Admission[]
 
   @@map("patients")
 }
@@ -297,6 +307,7 @@ model Doctor {
   prescriptions     Prescription[]
   assignedStaff     Staff[]                @relation("DoctorStaff")
   labOrders         LabOrder[]
+  admissions        Admission[]
 
   @@map("doctors")
 }
@@ -861,4 +872,125 @@ model Refund {
   initiator       User?        @relation("RefundInitiator", fields: [initiatedBy], references: [id])
 
   @@map("refunds")
+}
+
+model Ward {
+  id              String        @id @db.Text
+  hospitalId      String        @map("hospital_id")
+  departmentId    String?       @map("department_id")
+  name            String
+  wardType        String        @map("ward_type") // GENERAL | SEMI_PRIVATE | PRIVATE | ICU | HDU | NICU | PEDIATRIC
+  floor           String?
+  totalBeds       Int           @map("total_beds")
+  chargePerDay    Decimal       @db.Decimal(10, 2) @map("charge_per_day")
+  isActive        Boolean       @default(true) @map("is_active")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  hospital        Hospital      @relation(fields: [hospitalId], references: [id])
+  department      Department?   @relation(fields: [departmentId], references: [id])
+  beds            Bed[]
+  admissions      Admission[]
+  transfersFrom   AdmissionTransfer[] @relation("FromWard")
+  transfersTo     AdmissionTransfer[] @relation("ToWard")
+
+  @@map("wards")
+}
+
+model Bed {
+  id              String        @id @db.Text
+  hospitalId      String        @map("hospital_id")
+  wardId          String        @map("ward_id")
+  bedNumber       String        @map("bed_number")
+  bedType         String        @default("STANDARD") @map("bed_type") // STANDARD | ICU | OXYGEN | VENTILATOR
+  status          String        @default("AVAILABLE") // AVAILABLE | OCCUPIED | MAINTENANCE | RESERVED
+  isActive        Boolean       @default(true) @map("is_active")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  hospital        Hospital      @relation(fields: [hospitalId], references: [id])
+  ward            Ward          @relation(fields: [wardId], references: [id], onDelete: Cascade)
+  admissions      Admission[]
+  transfersFrom   AdmissionTransfer[] @relation("FromBed")
+  transfersTo     AdmissionTransfer[] @relation("ToBed")
+
+  @@unique([wardId, bedNumber])
+  @@map("beds")
+}
+
+model Admission {
+  id                  String              @id @db.Text
+  hospitalId          String              @map("hospital_id")
+  patientId           String              @map("patient_id")
+  doctorId            String              @map("doctor_id")
+  departmentId        String              @map("department_id")
+  wardId              String              @map("ward_id")
+  bedId               String              @map("bed_id")
+  admissionNumber     String              @unique @map("admission_number") // ADM-YYYY-XXXXXX
+  admissionType       String              @map("admission_type") // PLANNED | EMERGENCY | POST_OP
+  admissionDate       DateTime            @default(now()) @map("admission_date")
+  chiefComplaint      String?             @map("chief_complaint")
+  admissionDiagnosis  String?             @map("admission_diagnosis")
+  dischargeDate       DateTime?           @map("discharge_date")
+  dischargeDiagnosis  String?             @map("discharge_diagnosis")
+  dischargeCondition  String?             @map("discharge_condition") // RECOVERED | IMPROVED | REFERRED | AGAINST_ADVICE | DEATH
+  dischargeInstructions String?           @map("discharge_instructions")
+  status              String              @default("ADMITTED") // ADMITTED | DISCHARGED | TRANSFERRED
+  primaryNurseId      String?             @map("primary_nurse_id")
+  attendantName       String?             @map("attendant_name")
+  attendantPhone      String?             @map("attendant_phone")
+  attendantRelation   String?             @map("attendant_relation")
+  dailyRoomRate       Decimal             @db.Decimal(10, 2) @map("daily_room_rate")
+  lastBilledDate      DateTime?           @map("last_billed_date")
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+
+  hospital            Hospital            @relation(fields: [hospitalId], references: [id])
+  patient             Patient             @relation(fields: [patientId], references: [id])
+  doctor              Doctor              @relation(fields: [doctorId], references: [id])
+  department          Department          @relation(fields: [departmentId], references: [id])
+  ward                Ward                @relation(fields: [wardId], references: [id])
+  bed                 Bed                 @relation(fields: [bedId], references: [id])
+  primaryNurse        User?               @relation("PrimaryNurse", fields: [primaryNurseId], references: [id])
+  notes               AdmissionNote[]
+  transfers           AdmissionTransfer[]
+
+  @@map("admissions")
+}
+
+model AdmissionNote {
+  id              String        @id @db.Text
+  admissionId     String        @map("admission_id")
+  hospitalId      String        @map("hospital_id")
+  noteType        String        @map("note_type") // DOCTOR_ROUND | NURSE_NOTE | PROCEDURE | INCIDENT
+  notes           String
+  authoredBy      String        @map("authored_by")
+  authoredAt      DateTime      @default(now()) @map("authored_at")
+
+  admission       Admission     @relation(fields: [admissionId], references: [id], onDelete: Cascade)
+  hospital        Hospital      @relation(fields: [hospitalId], references: [id])
+  author          User          @relation("NoteAuthor", fields: [authoredBy], references: [id])
+
+  @@map("admission_notes")
+}
+
+model AdmissionTransfer {
+  id              String        @id @db.Text
+  admissionId     String        @map("admission_id")
+  fromWardId      String?       @map("from_ward_id")
+  fromBedId       String?       @map("from_bed_id")
+  toWardId        String?       @map("to_ward_id")
+  toBedId         String?       @map("to_bed_id")
+  reason          String?
+  transferredBy   String?       @map("transferred_by")
+  transferredAt   DateTime      @default(now()) @map("transferred_at")
+
+  admission       Admission     @relation(fields: [admissionId], references: [id], onDelete: Cascade)
+  fromWard        Ward?         @relation("FromWard", fields: [fromWardId], references: [id])
+  fromBed         Bed?          @relation("FromBed", fields: [fromBedId], references: [id])
+  toWard          Ward?         @relation("ToWard", fields: [toWardId], references: [id])
+  toBed           Bed?          @relation("ToBed", fields: [toBedId], references: [id])
+  performer       User?         @relation("TransferPerformer", fields: [transferredBy], references: [id])
+
+  @@map("admission_transfers")
 }

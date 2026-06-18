@@ -173,5 +173,59 @@ export const initiatePaymentSchema = z.object({
 });
 export type InitiatePaymentRequest = z.infer<typeof initiatePaymentSchema>;
 
+// --- Inpatient Ward & Bed ---
+export const createWardSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  wardType: z.enum(["GENERAL", "SEMI_PRIVATE", "PRIVATE", "ICU", "HDU", "NICU", "PEDIATRIC"]),
+  floor: z.string().optional(),
+  totalBeds: z.number().int().min(1, "Total beds must be at least 1"),
+  chargePerDay: z.number().min(0, "Charge per day must be non-negative")
+});
+export type CreateWardRequest = z.infer<typeof createWardSchema>;
+
+export const createBedSchema = z.object({
+  bedNumber: z.string().min(1, "Bed number is required"),
+  bedType: z.enum(["STANDARD", "ICU", "OXYGEN", "VENTILATOR"]).default("STANDARD"),
+  status: z.enum(["AVAILABLE", "OCCUPIED", "MAINTENANCE", "RESERVED"]).default("AVAILABLE")
+});
+export type CreateBedRequest = z.infer<typeof createBedSchema>;
+
+// --- Admission ---
+export const createAdmissionSchema = z.object({
+  patientId: z.string().min(1, "Patient ID is required"),
+  doctorId: z.string().min(1, "Doctor ID is required"),
+  departmentId: z.string().min(1, "Department ID is required"),
+  wardId: z.string().min(1, "Ward ID is required"),
+  bedId: z.string().min(1, "Bed ID is required"),
+  admissionType: z.enum(["PLANNED", "EMERGENCY", "POST_OP"]),
+  chiefComplaint: z.string().optional(),
+  admissionDiagnosis: z.string().optional(),
+  primaryNurseId: z.string().optional(),
+  attendantName: z.string().optional(),
+  attendantPhone: z.string().optional(),
+  attendantRelation: z.string().optional()
+});
+export type CreateAdmissionRequest = z.infer<typeof createAdmissionSchema>;
+
+export const recordAdmissionNoteSchema = z.object({
+  noteType: z.enum(["DOCTOR_ROUND", "NURSE_NOTE", "PROCEDURE", "INCIDENT"]),
+  notes: z.string().min(1, "Notes are required")
+});
+export type RecordAdmissionNoteRequest = z.infer<typeof recordAdmissionNoteSchema>;
+
+export const transferPatientSchema = z.object({
+  toWardId: z.string().min(1, "Destination ward ID is required"),
+  toBedId: z.string().min(1, "Destination bed ID is required"),
+  reason: z.string().optional()
+});
+export type TransferPatientRequest = z.infer<typeof transferPatientSchema>;
+
+export const dischargePatientSchema = z.object({
+  dischargeDiagnosis: z.string().min(1, "Discharge diagnosis is required"),
+  dischargeCondition: z.enum(["RECOVERED", "IMPROVED", "REFERRED", "AGAINST_ADVICE", "DEATH"]),
+  dischargeInstructions: z.string().optional()
+});
+export type DischargePatientRequest = z.infer<typeof dischargePatientSchema>;
+
 export * from './permissions.js';
 

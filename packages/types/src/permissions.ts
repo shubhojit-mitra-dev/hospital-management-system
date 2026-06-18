@@ -14,7 +14,10 @@ export type Permission =
   | 'pharmacy:write'
   | 'pharmacy_catalog:write'
   | 'billing:read'
-  | 'billing:write';
+  | 'billing:write'
+  | 'inpatient:read'
+  | 'inpatient:write'
+  | 'ward:write';
 
 export const ALL_PERMISSIONS: Permission[] = [
   'hospital:read',
@@ -33,6 +36,9 @@ export const ALL_PERMISSIONS: Permission[] = [
   'pharmacy_catalog:write',
   'billing:read',
   'billing:write',
+  'inpatient:read',
+  'inpatient:write',
+  'ward:write',
 ];
 
 export const RolePermissions: Record<string, Permission[]> = {
@@ -53,6 +59,9 @@ export const RolePermissions: Record<string, Permission[]> = {
     'pharmacy_catalog:write',
     'billing:read',
     'billing:write',
+    'inpatient:read',
+    'inpatient:write',
+    'ward:write',
   ],
   DOCTOR: [
     'hospital:read',
@@ -63,6 +72,8 @@ export const RolePermissions: Record<string, Permission[]> = {
     'lab:write',
     'pharmacy:read',
     'billing:read',
+    'inpatient:read',
+    'inpatient:write',
   ],
   NURSE: [
     'hospital:read',
@@ -71,6 +82,8 @@ export const RolePermissions: Record<string, Permission[]> = {
     'staff:read',
     'lab:read',
     'lab:write',
+    'inpatient:read',
+    'inpatient:write',
   ],
   RECEPTIONIST: [
     'hospital:read',
@@ -106,5 +119,6 @@ export const RolePermissions: Record<string, Permission[]> = {
   PATIENT: [
     'hospital:read',
     'billing:read',
+    'inpatient:read',
   ],
 };

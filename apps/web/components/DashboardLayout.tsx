@@ -125,6 +125,22 @@ export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps
       });
     }
 
+    // Module 10: Inpatient Admission Management
+    if (['HOSPITAL_ADMIN', 'DOCTOR', 'NURSE'].includes(role || '')) {
+      items.push({
+        name: 'Inpatient Care',
+        href: '/inpatient',
+        icon: Activity,
+      });
+    }
+    if (role === 'HOSPITAL_ADMIN') {
+      items.push({
+        name: 'Ward Setup',
+        href: '/wards',
+        icon: Layers,
+      });
+    }
+
     // Patient access
     if (role === 'PATIENT') {
       items.push({
