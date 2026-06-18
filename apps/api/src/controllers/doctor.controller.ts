@@ -109,7 +109,7 @@ export class DoctorController {
 
   // Express handlers
   static async create(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context required' });
     }
@@ -199,7 +199,7 @@ export class DoctorController {
   }
 
   static async list(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context required' });
     }
@@ -262,7 +262,7 @@ export class DoctorController {
 
   static async getById(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     try {
       const doctor = await prisma.doctor.findFirst({
@@ -295,7 +295,7 @@ export class DoctorController {
 
   static async update(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     const updateData = { ...req.body };
 
     try {
@@ -432,7 +432,7 @@ export class DoctorController {
 
   static async applyLeave(req: Request, res: Response) {
     const doctorId = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context required' });
     }
@@ -479,7 +479,7 @@ export class DoctorController {
 
   static async cancelLeave(req: Request, res: Response) {
     const leaveId = req.params.leaveId as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     try {
       const leave = await prisma.doctorLeave.findFirst({
