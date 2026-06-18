@@ -34,6 +34,8 @@ model Hospital {
   doctors        Doctor[]
   staff          Staff[]
   appointments   Appointment[]
+  labTestCatalogs LabTestCatalog[]
+  labOrders       LabOrder[]
 }
 
 model User {
@@ -68,6 +70,10 @@ model User {
   appointmentsBooked  Appointment[]     @relation("Booker")
   emrUploaded         EMRRecord[]       @relation("Uploader")
   patient             Patient?
+
+  sampleCollected     LabOrder[]        @relation("SampleCollector")
+  reviewedLabOrders   LabOrder[]        @relation("LabReviewer")
+  enteredLabResults   LabOrderItem[]    @relation("ResultEnterer")
 }
 
 model RefreshToken {
@@ -190,6 +196,8 @@ model Patient {
   consultations     Consultation[]
   prescriptions     Prescription[]
   emrRecords        EMRRecord[]
+  labOrders         LabOrder[]
+  labResults        LabResult[]
 
   @@map("patients")
 }
@@ -273,6 +281,7 @@ model Doctor {
   consultations     Consultation[]
   prescriptions     Prescription[]
   assignedStaff     Staff[]                @relation("DoctorStaff")
+  labOrders         LabOrder[]
 
   @@map("doctors")
 }
@@ -434,6 +443,7 @@ model Consultation {
   doctor            Doctor                 @relation(fields: [doctorId], references: [id])
   prescriptions     Prescription[]
   emrRecords        EMRRecord[]
+  labOrders         LabOrder[]
 
   @@map("consultations")
 }
@@ -515,4 +525,98 @@ model ICDCode {
   category          String?
 
   @@map("icd_codes")
+}
+
+model LabTestCatalog {
+  id                      String         @id @db.Text
+  hospitalId              String         @map("hospital_id")
+  departmentId            String?        @map("department_id")
+  testCode                String         @map("test_code")
+  testName                String         @map("test_name")
+  category                String
+  description             String?
+  normalRange             Json?          @map("normal_range")
+  price                   Decimal        @db.Decimal(10, 2)
+  preparationInstructions String?        @map("preparation_instructions")
+  turnaroundHours         Int            @default(24) @map("turnaround_hours")
+  isActive                Boolean        @default(true) @map("is_active")
+  createdAt               DateTime       @default(now()) @map("created_at")
+  updatedAt               DateTime       @updatedAt @map("updated_at")
+
+  hospital                Hospital       @relation(fields: [hospitalId], references: [id])
+  department              Department?    @relation(fields: [departmentId], references: [id])
+  orderItems              LabOrderItem[]
+
+  @@map("lab_test_catalog")
+}
+
+model LabOrder {
+  id                 String         @id @db.Text
+  hospitalId         String         @map("hospital_id")
+  patientId          String         @map("patient_id")
+  doctorId           String         @map("doctor_id")
+  consultationId     String?        @map("consultation_id")
+  orderNumber        String         @unique @map("order_number")
+  status             String         @default("PENDING")
+  priority           String         @default("ROUTINE")
+  clinicalNotes      String?        @map("clinical_notes")
+  sampleCollectedAt  DateTime?      @map("sample_collected_at")
+  sampleCollectedBy  String?        @map("sample_collected_by")
+  completedAt        DateTime?      @map("completed_at")
+  reviewedAt         DateTime?      @map("reviewed_at")
+  reviewedBy         String?        @map("reviewed_by")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+
+  hospital           Hospital       @relation(fields: [hospitalId], references: [id])
+  patient            Patient        @relation(fields: [patientId], references: [id])
+  doctor             Doctor         @relation(fields: [doctorId], references: [id])
+  consultation       Consultation?  @relation(fields: [consultationId], references: [id])
+  sampleCollector    User?          @relation("SampleCollector", fields: [sampleCollectedBy], references: [id])
+  reviewer           User?          @relation("LabReviewer", fields: [reviewedBy], references: [id])
+  items              LabOrderItem[]
+
+  @@map("lab_orders")
+}
+
+model LabOrderItem {
+  id                   String         @id @db.Text
+  labOrderId           String         @map("lab_order_id")
+  testCatalogId        String         @map("test_catalog_id")
+  testCode             String         @map("test_code")
+  testName             String         @map("test_name")
+  price                Decimal        @db.Decimal(10, 2)
+  status               String         @default("PENDING")
+  resultValues         Json?          @map("result_values")
+  resultInterpretation String?        @map("result_interpretation")
+  technicianNotes      String?        @map("technician_notes")
+  reportFileUrl        String?        @map("report_file_url")
+  resultEnteredAt      DateTime?      @map("result_entered_at")
+  resultEnteredBy      String?        @map("result_entered_by")
+
+  labOrder             LabOrder       @relation(fields: [labOrderId], references: [id], onDelete: Cascade)
+  testCatalog          LabTestCatalog @relation(fields: [testCatalogId], references: [id])
+  resultEnterer        User?          @relation("ResultEnterer", fields: [resultEnteredBy], references: [id])
+  results              LabResult[]
+
+  @@map("lab_order_items")
+}
+
+model LabResult {
+  id              String       @id @db.Text
+  labOrderItemId  String       @map("lab_order_item_id")
+  patientId       String       @map("patient_id")
+  parameterName   String       @map("parameter_name")
+  resultValue     String       @map("result_value")
+  unit            String?
+  referenceMin    String?      @map("reference_min")
+  referenceMax    String?      @map("reference_max")
+  isAbnormal      Boolean      @default(false) @map("is_abnormal")
+  isCritical      Boolean      @default(false) @map("is_critical")
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  labOrderItem    LabOrderItem @relation(fields: [labOrderItemId], references: [id], onDelete: Cascade)
+  patient         Patient      @relation(fields: [patientId], references: [id])
+
+  @@map("lab_results")
 }

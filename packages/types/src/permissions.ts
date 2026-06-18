@@ -6,7 +6,10 @@ export type Permission =
   | 'holiday:read'
   | 'holiday:write'
   | 'staff:read'
-  | 'staff:write';
+  | 'staff:write'
+  | 'lab:read'
+  | 'lab:write'
+  | 'lab_catalog:write';
 
 export const ALL_PERMISSIONS: Permission[] = [
   'hospital:read',
@@ -17,6 +20,9 @@ export const ALL_PERMISSIONS: Permission[] = [
   'holiday:write',
   'staff:read',
   'staff:write',
+  'lab:read',
+  'lab:write',
+  'lab_catalog:write',
 ];
 
 export const RolePermissions: Record<string, Permission[]> = {
@@ -29,18 +35,25 @@ export const RolePermissions: Record<string, Permission[]> = {
     'holiday:write',
     'staff:read',
     'staff:write',
+    'lab:read',
+    'lab:write',
+    'lab_catalog:write',
   ],
   DOCTOR: [
     'hospital:read',
     'department:read',
     'holiday:read',
     'staff:read',
+    'lab:read',
+    'lab:write',
   ],
   NURSE: [
     'hospital:read',
     'department:read',
     'holiday:read',
     'staff:read',
+    'lab:read',
+    'lab:write',
   ],
   RECEPTIONIST: [
     'hospital:read',
@@ -53,6 +66,8 @@ export const RolePermissions: Record<string, Permission[]> = {
     'department:read',
     'holiday:read',
     'staff:read',
+    'lab:read',
+    'lab:write',
   ],
   PHARMACIST: [
     'hospital:read',

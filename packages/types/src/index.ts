@@ -53,5 +53,38 @@ export const changePasswordRequestSchema = z.object({
 });
 export type ChangePasswordRequest = z.infer<typeof changePasswordRequestSchema>;
 
+// Laboratory Management Schemas
+export const createLabOrderSchema = z.object({
+  patientId: z.string().min(1, "Patient ID is required"),
+  consultationId: z.string().optional(),
+  priority: z.enum(["ROUTINE", "URGENT", "STAT"]).default("ROUTINE"),
+  clinicalNotes: z.string().optional(),
+  tests: z.array(z.object({
+    testCatalogId: z.string().min(1, "Test Catalog ID is required"),
+    testCode: z.string().min(1, "Test Code is required")
+  })).min(1, "At least one test must be ordered")
+});
+export type CreateLabOrderRequest = z.infer<typeof createLabOrderSchema>;
+
+export const uploadLabResultsSchema = z.object({
+  items: z.array(z.object({
+    labOrderItemId: z.string().min(1, "Lab Order Item ID is required"),
+    resultValues: z.record(z.string()),
+    resultInterpretation: z.enum(["NORMAL", "ABNORMAL", "CRITICAL"]),
+    technicianNotes: z.string().optional(),
+    results: z.array(z.object({
+      parameterName: z.string().min(1, "Parameter name is required"),
+      resultValue: z.string().min(1, "Result value is required"),
+      unit: z.string().optional(),
+      referenceMin: z.string().optional(),
+      referenceMax: z.string().optional(),
+      isAbnormal: z.boolean().default(false),
+      isCritical: z.boolean().default(false)
+    }))
+  })),
+  reportFileKey: z.string().optional()
+});
+export type UploadLabResultsRequest = z.infer<typeof uploadLabResultsSchema>;
+
 export * from './permissions.js';
 

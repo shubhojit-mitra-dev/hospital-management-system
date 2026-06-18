@@ -68,7 +68,14 @@ export default function ConsultationWorkspacePage() {
   const [success, setSuccess] = useState('');
 
   // Right Panel Tabs
-  const [activeTab, setActiveTab] = useState<'soap' | 'diagnosis' | 'prescription' | 'emr'>('soap');
+  const [activeTab, setActiveTab] = useState<'soap' | 'diagnosis' | 'prescription' | 'lab' | 'emr'>('soap');
+
+  // Lab Ordering & History State
+  const [labCatalog, setLabCatalog] = useState<any[]>([]);
+  const [orderedTests, setOrderedTests] = useState<any[]>([]);
+  const [labHistory, setLabHistory] = useState<any[]>([]);
+  const [labCatalogSearch, setLabCatalogSearch] = useState('');
+  const [labCatalogResults, setLabCatalogResults] = useState<any[]>([]);
 
   // SOAP Form State
   const [consultationId, setConsultationId] = useState('');
@@ -131,12 +138,14 @@ export default function ConsultationWorkspacePage() {
       setAppointment(aptRes.data);
       setPatient(aptRes.data.patient);
 
-      // Step 3: Fetch patient details: vitals, allergies, EMRs
+      // Step 3: Fetch patient details: vitals, allergies, EMRs, Lab History, Lab Catalog
       const patId = aptRes.data.patientId;
-      const [vitalsRes, historyRes, emrRes] = await Promise.all([
+      const [vitalsRes, historyRes, emrRes, labHistoryRes, labCatalogRes] = await Promise.all([
         api.get(`/api/v1/patients/${patId}/vitals`),
         api.get(`/api/v1/patients/${patId}/history`),
         api.get(`/api/v1/emr/patient/${patId}`),
+        api.get(`/api/v1/lab/orders/patient/${patId}`),
+        api.get('/api/v1/lab/catalog'),
       ]);
 
       if (vitalsRes.data && vitalsRes.data.length > 0) {
@@ -144,6 +153,8 @@ export default function ConsultationWorkspacePage() {
       }
       setAllergies(historyRes.data?.allergies || []);
       setEmrRecords(emrRes.data || []);
+      setLabHistory(labHistoryRes.data?.data || []);
+      setLabCatalog(labCatalogRes.data?.data || []);
     } catch (err: any) {
       console.error(err);
       setError('Failed to initialize consultation workspace.');
@@ -175,6 +186,20 @@ export default function ConsultationWorkspacePage() {
     const delay = setTimeout(searchICD, 300);
     return () => clearTimeout(delay);
   }, [icdSearch]);
+
+  // Lab Catalog Search Autocomplete
+  useEffect(() => {
+    if (!labCatalogSearch) {
+      setLabCatalogResults([]);
+      return;
+    }
+    const filtered = labCatalog.filter(
+      (item) =>
+        item.testName.toLowerCase().includes(labCatalogSearch.toLowerCase()) ||
+        item.testCode.toLowerCase().includes(labCatalogSearch.toLowerCase())
+    );
+    setLabCatalogResults(filtered);
+  }, [labCatalogSearch, labCatalog]);
 
   // Client-side allergy check when prescription items change
   useEffect(() => {
@@ -227,6 +252,17 @@ export default function ConsultationWorkspacePage() {
           consultationId,
           notes: rxNotes,
           items: activeItems,
+        });
+      }
+
+      // Submit Lab Order if tests are selected
+      if (orderedTests.length > 0) {
+        await api.post('/api/v1/lab/orders', {
+          patientId: patient?.id,
+          consultationId,
+          priority: 'ROUTINE',
+          clinicalNotes: soapForm.chiefComplaint || 'Consultation lab order',
+          tests: orderedTests.map(t => ({ testCatalogId: t.id, testCode: t.testCode }))
         });
       }
 
@@ -418,7 +454,7 @@ export default function ConsultationWorkspacePage() {
               {/* Workspace Navigation Tabs */}
               <div>
                 <div className="flex border-b border-slate-200 bg-slate-50/50 px-4">
-                  {(['soap', 'diagnosis', 'prescription', 'emr'] as const).map((tab) => (
+                  {(['soap', 'diagnosis', 'prescription', 'lab', 'emr'] as const).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
@@ -429,7 +465,7 @@ export default function ConsultationWorkspacePage() {
                           : 'border-transparent text-slate-500 hover:text-slate-700'
                       )}
                     >
-                      {tab === 'soap' ? 'SOAP Notes' : tab}
+                      {tab === 'soap' ? 'SOAP Notes' : tab === 'lab' ? 'Labs' : tab}
                     </button>
                   ))}
                 </div>
@@ -647,6 +683,120 @@ export default function ConsultationWorkspacePage() {
                           placeholder="General instructions for pharmacist or patient..."
                           className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                         />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* LAB ORDERING & HISTORY TAB */}
+                  {activeTab === 'lab' && (
+                    <div className="space-y-6 font-semibold text-sm">
+                      {/* Lab Order Builder */}
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Order Diagnostic Tests</span>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">Search Lab Catalog</label>
+                          <input
+                            type="text"
+                            placeholder="Search tests (e.g. CBC, Lipid)..."
+                            value={labCatalogSearch}
+                            onChange={(e) => setLabCatalogSearch(e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-medium"
+                          />
+                          {labCatalogResults.length > 0 && (
+                            <div className="border border-slate-200 rounded-xl mt-2 max-h-[180px] overflow-y-auto divide-y divide-slate-100 bg-white shadow-lg">
+                              {labCatalogResults.map((item) => (
+                                <button
+                                  key={item.id}
+                                  type="button"
+                                  onClick={() => {
+                                    if (!orderedTests.some(t => t.id === item.id)) {
+                                      setOrderedTests([...orderedTests, item]);
+                                    }
+                                    setLabCatalogSearch('');
+                                    setLabCatalogResults([]);
+                                  }}
+                                  className="w-full text-left p-3 hover:bg-slate-50 flex justify-between items-center cursor-pointer text-xs"
+                                >
+                                  <div>
+                                    <span className="font-bold text-teal-700 font-mono mr-2">{item.testCode}</span>
+                                    <span>{item.testName}</span>
+                                  </div>
+                                  <span className="text-slate-500 font-bold">₹{item.price}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Selected Tests */}
+                        <div className="space-y-2">
+                          <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ordered Tests</span>
+                          {orderedTests.length === 0 ? (
+                            <p className="text-xs text-slate-400 italic">No tests selected. Use search above.</p>
+                          ) : (
+                            <div className="flex flex-wrap gap-2">
+                              {orderedTests.map((item) => (
+                                <div key={item.id} className="flex items-center gap-1.5 bg-teal-50 border border-teal-100 text-teal-800 text-xs px-2.5 py-1 rounded-xl">
+                                  <span className="font-bold font-mono">{item.testCode}</span>
+                                  <span>{item.testName}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setOrderedTests(orderedTests.filter(t => t.id !== item.id))}
+                                    className="text-teal-600 hover:text-teal-900 font-bold ml-1 cursor-pointer"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Lab Results History Viewer */}
+                      <div className="pt-4 border-t border-slate-100 space-y-3">
+                        <span className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Historical Lab Reports</span>
+                        {labHistory.length === 0 ? (
+                          <p className="text-xs text-slate-400 italic">No previous lab history found.</p>
+                        ) : (
+                          <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                            {labHistory.map((order: any) => (
+                              <div key={order.id} className="border border-slate-100 p-3 rounded-xl bg-slate-50/20 text-xs space-y-2">
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold text-slate-800">{order.orderNumber} ({order.status})</span>
+                                  <span className="text-slate-400 font-semibold">{new Date(order.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <div className="divide-y divide-slate-100">
+                                  {order.items?.map((item: any) => (
+                                    <div key={item.id} className="py-1.5 space-y-1">
+                                      <p className="font-bold text-teal-850">{item.testName} ({item.testCode})</p>
+                                      {item.results && item.results.length > 0 ? (
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pl-2 border-l border-slate-150">
+                                          {item.results.map((res: any) => (
+                                            <div key={res.id} className="p-1 rounded bg-white border border-slate-100">
+                                              <p className="text-[10px] text-slate-450 font-bold">{res.parameterName}</p>
+                                              <p className={cn(
+                                                "font-bold",
+                                                res.isCritical ? "text-red-650" : res.isAbnormal ? "text-orange-500" : "text-slate-700"
+                                              )}>
+                                                {res.resultValue} {res.unit}
+                                              </p>
+                                              <p className="text-[9px] text-slate-450">Range: {res.referenceMin || '0'} - {res.referenceMax || 'N/A'}</p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <p className="text-[10px] text-slate-450 italic pl-2">Results not entered or pending.</p>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
