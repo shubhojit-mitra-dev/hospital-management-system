@@ -20,6 +20,7 @@ interface Patient {
   gender: string;
   bloodGroup: string | null;
   phone: string;
+  alternatePhone: string | null;
   email: string | null;
   address: string | null;
   city: string | null;
@@ -613,49 +614,52 @@ export default function PatientDetailPage() {
               )}
 
               {/* Latest Vitals Overview Cards */}
-              {vitalsList.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3">
-                    <Scale className="h-9 w-9 text-blue-500 bg-blue-50 p-2 rounded-xl" />
-                    <div>
-                      <span className="block text-[10px] text-slate-400 font-bold uppercase">Weight & BMI</span>
-                      <span className="font-bold text-slate-800 text-sm mt-0.5">
-                        {vitalsList[0].weightKg} Kg • {vitalsList[0].bmi ? parseFloat(vitalsList[0].bmi).toFixed(1) : '—'}
-                      </span>
+              {vitalsList.length > 0 && (() => {
+                const latestVitals = vitalsList[0]!;
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3">
+                      <Scale className="h-9 w-9 text-blue-500 bg-blue-50 p-2 rounded-xl" />
+                      <div>
+                        <span className="block text-[10px] text-slate-400 font-bold uppercase">Weight & BMI</span>
+                        <span className="font-bold text-slate-800 text-sm mt-0.5">
+                          {latestVitals.weightKg} Kg • {latestVitals.bmi ? parseFloat(latestVitals.bmi).toFixed(1) : '—'}
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3">
-                    <Heart className="h-9 w-9 text-red-500 bg-red-50 p-2 rounded-xl" />
-                    <div>
-                      <span className="block text-[10px] text-slate-400 font-bold uppercase">Blood Pressure</span>
-                      <span className="font-bold text-slate-800 text-sm mt-0.5">
-                        {vitalsList[0].bloodPressureSystolic}/{vitalsList[0].bloodPressureDiastolic} mmHg
-                      </span>
+                    <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3">
+                      <Heart className="h-9 w-9 text-red-500 bg-red-50 p-2 rounded-xl" />
+                      <div>
+                        <span className="block text-[10px] text-slate-400 font-bold uppercase">Blood Pressure</span>
+                        <span className="font-bold text-slate-800 text-sm mt-0.5">
+                          {latestVitals.bloodPressureSystolic}/{latestVitals.bloodPressureDiastolic} mmHg
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3">
-                    <Wind className="h-9 w-9 text-teal-500 bg-teal-50 p-2 rounded-xl" />
-                    <div>
-                      <span className="block text-[10px] text-slate-400 font-bold uppercase">Pulse & Oxygen</span>
-                      <span className="font-bold text-slate-800 text-sm mt-0.5">
-                        {vitalsList[0].pulseBpm} Bpm • SpO2 {vitalsList[0].spo2Percent}%
-                      </span>
+                    <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3">
+                      <Wind className="h-9 w-9 text-teal-500 bg-teal-50 p-2 rounded-xl" />
+                      <div>
+                        <span className="block text-[10px] text-slate-400 font-bold uppercase">Pulse & Oxygen</span>
+                        <span className="font-bold text-slate-800 text-sm mt-0.5">
+                          {latestVitals.pulseBpm} Bpm • SpO2 {latestVitals.spo2Percent}%
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3">
-                    <Thermometer className="h-9 w-9 text-amber-500 bg-amber-50 p-2 rounded-xl" />
-                    <div>
-                      <span className="block text-[10px] text-slate-400 font-bold uppercase">Temperature</span>
-                      <span className="font-bold text-slate-800 text-sm mt-0.5">
-                        {vitalsList[0].temperatureC}°C
-                      </span>
+                    <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3">
+                      <Thermometer className="h-9 w-9 text-amber-500 bg-amber-50 p-2 rounded-xl" />
+                      <div>
+                        <span className="block text-[10px] text-slate-400 font-bold uppercase">Temperature</span>
+                        <span className="font-bold text-slate-800 text-sm mt-0.5">
+                          {latestVitals.temperatureC}°C
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Vitals History List */}
               <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">

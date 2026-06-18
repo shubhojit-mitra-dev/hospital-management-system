@@ -6,7 +6,9 @@ import { AuditService } from '../services/audit.service.js';
 export class DoctorController {
   // Helper to parse time string "HH:MM" to minutes from midnight
   private static parseTimeToMinutes(timeStr: string): number {
-    const [hours, minutes] = timeStr.split(':').map(Number);
+    const parts = timeStr.split(':').map(Number);
+    const hours = parts[0] as number;
+    const minutes = parts[1] as number;
     return hours * 60 + minutes;
   }
 
@@ -92,9 +94,10 @@ export class DoctorController {
     });
     const bookedTimes = new Set(bookedAppointments.map((a) => a.appointmentTime));
 
-    // 7. Format slot list
     return allSlots.map((time) => {
-      const [hours, minutes] = time.split(':').map(Number);
+      const parts = time.split(':').map(Number);
+      const hours = parts[0] as number;
+      const minutes = parts[1] as number;
       const suffix = hours >= 12 ? 'PM' : 'AM';
       const displayHours = hours % 12 || 12;
       const displayTime = `${String(displayHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${suffix}`;

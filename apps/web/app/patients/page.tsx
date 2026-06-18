@@ -6,6 +6,7 @@ import { Search, UserPlus, FileText, ChevronLeft, ChevronRight, User, Phone, Mai
 import { DashboardLayout } from '@/components/DashboardLayout';
 import api from '@/lib/axios';
 import { useAuthStore } from '@/store/authStore';
+import { cn } from '@/lib/utils';
 
 interface Patient {
   id: string;
