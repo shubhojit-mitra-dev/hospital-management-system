@@ -66,7 +66,7 @@ export class AdminController {
         ipAddress: req.ip,
       });
 
-      return res.status(201).json({ message: 'Staff user created successfully. Welcome email sent.' });
+      return res.status(201).json({ message: 'Staff user created successfully. Welcome email sent.', userId });
     } catch (err) {
       console.error(err);
       return res.status(500).json({ error: 'Internal server error' });
