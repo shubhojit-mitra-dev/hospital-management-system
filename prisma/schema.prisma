@@ -48,6 +48,8 @@ model Hospital {
   beds            Bed[]
   admissions      Admission[]
   admissionNotes  AdmissionNote[]
+  emergencyCases  EmergencyCase[]
+  dutyRoster      DutyRoster[]
 }
 
 model User {
@@ -94,6 +96,11 @@ model User {
   primaryNursingAdmissions Admission[]      @relation("PrimaryNurse")
   authoredAdmissionNotes   AdmissionNote[]  @relation("NoteAuthor")
   transferredAdmissions    AdmissionTransfer[] @relation("TransferPerformer")
+  triagedEmergencyCases   EmergencyCase[]  @relation("TriageStaff")
+  doctorEmergencyCases    EmergencyCase[]  @relation("EmergencyDoctor")
+  nurseEmergencyCases     EmergencyCase[]  @relation("EmergencyNurse")
+  performedEmergencyActions EmergencyAction[]
+  dutyRosters             DutyRoster[]
 }
 
 model RefreshToken {
@@ -161,6 +168,7 @@ model Department {
   doctorDepartments DoctorDepartment[]
   wards        Ward[]
   admissions   Admission[]
+  dutyRosters  DutyRoster[]
 
   @@unique([hospitalId, code])
 }
@@ -223,6 +231,7 @@ model Patient {
   invoices          Invoice[]
   payments          Payment[]
   admissions        Admission[]
+  emergencyCases    EmergencyCase[]
 
   @@map("patients")
 }
@@ -954,6 +963,7 @@ model Admission {
   primaryNurse        User?               @relation("PrimaryNurse", fields: [primaryNurseId], references: [id])
   notes               AdmissionNote[]
   transfers           AdmissionTransfer[]
+  emergencyCases      EmergencyCase[]
 
   @@map("admissions")
 }
@@ -993,4 +1003,84 @@ model AdmissionTransfer {
   performer       User?         @relation("TransferPerformer", fields: [transferredBy], references: [id])
 
   @@map("admission_transfers")
+}
+
+model EmergencyCase {
+  id                  String            @id @db.Text
+  hospitalId          String            @map("hospital_id")
+  patientId           String?           @map("patient_id")
+  caseNumber          String            @unique @map("case_number") // EMG-YYYY-XXXXXX
+  patientName         String?           @map("patient_name")
+  patientAge          Int?              @map("patient_age")
+  patientGender       String?           @map("patient_gender")
+  patientPhone        String?           @map("patient_phone")
+  broughtBy           String?           @map("brought_by")
+  triageLevel         String            @map("triage_level") // IMMEDIATE | EMERGENT | URGENT | LESS_URGENT | NON_URGENT
+  chiefComplaint      String            @map("chief_complaint")
+  symptoms            String            @default("[]") // JSON string or comma-separated symptoms
+  mechanismOfInjury   String?           @map("mechanism_of_injury")
+  bpSystolic          Int?              @map("bp_systolic")
+  bpDiastolic         Int?              @map("bp_diastolic")
+  pulse               Int?              @map("pulse")
+  temperature         Decimal?          @db.Decimal(4, 2)
+  spo2                Int?
+  gcsScore            Int?              @map("gcs_score")
+  triageBy            String?           @map("triage_by")
+  attendingDoctorId   String?           @map("attending_doctor_id")
+  assignedNurseId     String?           @map("assigned_nurse_id")
+  disposition         String?           // ADMITTED | DISCHARGED | TRANSFERRED | DECEASED | LEFT_WITHOUT_TREATMENT
+  admissionId         String?           @map("admission_id")
+  arrivalTime         DateTime          @default(now()) @map("arrival_time")
+  triageTime          DateTime?         @map("triage_time")
+  doctorSeenTime      DateTime?         @map("doctor_seen_time")
+  dispositionTime     DateTime?         @map("disposition_time")
+  status              String            @default("ACTIVE") // ACTIVE | CLOSED
+  notes               String?
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  hospital            Hospital          @relation(fields: [hospitalId], references: [id])
+  patient             Patient?          @relation(fields: [patientId], references: [id])
+  triager             User?             @relation("TriageStaff", fields: [triageBy], references: [id])
+  doctor              User?             @relation("EmergencyDoctor", fields: [attendingDoctorId], references: [id])
+  nurse               User?             @relation("EmergencyNurse", fields: [assignedNurseId], references: [id])
+  admission           Admission?        @relation(fields: [admissionId], references: [id])
+  actions             EmergencyAction[]
+
+  @@map("emergency_cases")
+}
+
+model EmergencyAction {
+  id                  String            @id @db.Text
+  emergencyCaseId     String            @map("emergency_case_id")
+  actionType          String            @map("action_type") // MEDICATION | PROCEDURE | INVESTIGATION | NOTE
+  description         String
+  performedBy         String            @map("performed_by")
+  performedAt         DateTime          @default(now()) @map("performed_at")
+
+  emergencyCase       EmergencyCase     @relation(fields: [emergencyCaseId], references: [id], onDelete: Cascade)
+  performer           User              @relation(fields: [performedBy], references: [id])
+
+  @@map("emergency_actions")
+}
+
+model DutyRoster {
+  id                  String            @id @db.Text
+  hospitalId          String            @map("hospital_id")
+  departmentId        String            @map("department_id")
+  userId              String            @map("user_id")
+  userRole            String            @map("user_role") // DOCTOR | NURSE
+  shiftDate           DateTime          @db.Date @map("shift_date")
+  shiftType           String            @map("shift_type") // MORNING | EVENING | NIGHT
+  shiftStart          String            @map("shift_start")
+  shiftEnd            String            @map("shift_end")
+  isOnCall            Boolean           @default(false) @map("is_on_call")
+  createdAt           DateTime          @default(now()) @map("created_at")
+
+  hospital            Hospital          @relation(fields: [hospitalId], references: [id])
+  department          Department        @relation(fields: [departmentId], references: [id])
+  user                User              @relation(fields: [userId], references: [id])
+
+  @@unique([userId, shiftDate, shiftType])
+  @@map("duty_roster")
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
@@ -16,11 +16,13 @@ import {
   Menu, 
   X,
   Layers,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { cn } from '@/lib/utils';
+import api from '@/lib/axios';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -32,6 +34,29 @@ export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hasImmediateEmergency, setHasImmediateEmergency] = useState(false);
+
+  useEffect(() => {
+    const role = user?.role;
+    if (!role || !['HOSPITAL_ADMIN', 'RECEPTIONIST', 'DOCTOR', 'NURSE'].includes(role)) {
+      return;
+    }
+
+    const checkEmergencies = async () => {
+      try {
+        const res = await api.get('/api/v1/emergency');
+        const cases = res.data?.data?.cases || [];
+        const hasImmediate = cases.some((c: any) => c.triageLevel === 'IMMEDIATE' && c.status === 'ACTIVE');
+        setHasImmediateEmergency(hasImmediate);
+      } catch (err) {
+        console.error('Failed to check for immediate emergencies', err);
+      }
+    };
+
+    checkEmergencies();
+    const interval = setInterval(checkEmergencies, 15000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -138,6 +163,20 @@ export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps
         name: 'Ward Setup',
         href: '/wards',
         icon: Layers,
+      });
+    }
+
+    // Module 11: Emergency & Triage Management
+    if (['HOSPITAL_ADMIN', 'RECEPTIONIST', 'DOCTOR', 'NURSE'].includes(role || '')) {
+      items.push({
+        name: 'Emergency Board',
+        href: '/emergency',
+        icon: ShieldAlert,
+      });
+      items.push({
+        name: 'Duty Roster',
+        href: '/emergency/roster',
+        icon: Clock,
       });
     }
 
@@ -287,6 +326,12 @@ export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {hasImmediateEmergency && (
+            <div className="bg-red-600 text-white px-4 py-2.5 text-center text-xs font-extrabold uppercase tracking-wider animate-pulse flex items-center justify-center gap-2 z-50 border-b border-red-700 shadow-lg shadow-red-650/10">
+              <ShieldAlert className="h-4 w-4 shrink-0" />
+              <span>CRITICAL ALERT: Active Level 1 (IMMEDIATE) Emergency Case in Bay! MD assistance required immediately.</span>
+            </div>
+          )}
           {/* Top Header */}
           <header className="bg-white border-b border-slate-200/80 h-16 flex items-center justify-between px-6 md:px-8 sticky top-0 z-40">
             <div className="flex items-center gap-4">

@@ -227,5 +227,49 @@ export const dischargePatientSchema = z.object({
 });
 export type DischargePatientRequest = z.infer<typeof dischargePatientSchema>;
 
+// --- Emergency Management ---
+export const createEmergencyCaseSchema = z.object({
+  patientId: z.string().optional(),
+  patientName: z.string().optional(),
+  patientAge: z.number().int().optional(),
+  patientGender: z.string().optional(),
+  patientPhone: z.string().optional(),
+  broughtBy: z.string().optional(),
+  triageLevel: z.enum(["IMMEDIATE", "EMERGENT", "URGENT", "LESS_URGENT", "NON_URGENT"]),
+  chiefComplaint: z.string().min(1, "Chief complaint is required"),
+  symptoms: z.array(z.string()).optional(),
+  mechanismOfInjury: z.string().optional(),
+  bpSystolic: z.number().int().optional(),
+  bpDiastolic: z.number().int().optional(),
+  pulse: z.number().int().optional(),
+  temperature: z.number().optional(),
+  spo2: z.number().int().optional(),
+  gcsScore: z.number().int().min(3).max(15).optional()
+});
+export type CreateEmergencyCaseRequest = z.infer<typeof createEmergencyCaseSchema>;
+
+export const updateTriageSchema = z.object({
+  triageLevel: z.enum(["IMMEDIATE", "EMERGENT", "URGENT", "LESS_URGENT", "NON_URGENT"])
+});
+export type UpdateTriageRequest = z.infer<typeof updateTriageSchema>;
+
+export const logEmergencyActionSchema = z.object({
+  actionType: z.enum(["MEDICATION", "PROCEDURE", "INVESTIGATION", "NOTE"]),
+  description: z.string().min(1, "Description is required")
+});
+export type LogEmergencyActionRequest = z.infer<typeof logEmergencyActionSchema>;
+
+export const createDutyRosterSchema = z.object({
+  departmentId: z.string().min(1, "Department ID is required"),
+  userId: z.string().min(1, "User ID is required"),
+  userRole: z.enum(["DOCTOR", "NURSE"]),
+  shiftDate: z.string().min(1, "Shift date is required"),
+  shiftType: z.enum(["MORNING", "EVENING", "NIGHT"]),
+  shiftStart: z.string().min(1, "Shift start time is required"),
+  shiftEnd: z.string().min(1, "Shift end time is required"),
+  isOnCall: z.boolean().default(false)
+});
+export type CreateDutyRosterRequest = z.infer<typeof createDutyRosterSchema>;
+
 export * from './permissions.js';
 
