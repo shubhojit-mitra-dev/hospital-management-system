@@ -6,7 +6,7 @@ import { AuditService } from '../services/audit.service.js';
 
 export class AppointmentController {
   static async book(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context required' });
     }
@@ -115,7 +115,7 @@ export class AppointmentController {
   }
 
   static async list(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context required' });
     }
@@ -167,7 +167,7 @@ export class AppointmentController {
 
   static async getById(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     try {
       const appointment = await prisma.appointment.findFirst({
@@ -196,7 +196,7 @@ export class AppointmentController {
 
   static async confirm(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     try {
       const appointment = await prisma.appointment.findFirst({
@@ -232,7 +232,7 @@ export class AppointmentController {
 
   static async startConsultation(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     try {
       const appointment = await prisma.appointment.findFirst({
@@ -274,7 +274,7 @@ export class AppointmentController {
 
   static async complete(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     try {
       const appointment = await prisma.appointment.findFirst({
@@ -316,7 +316,7 @@ export class AppointmentController {
 
   static async cancel(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     const { reason } = req.body;
 
     try {
@@ -364,7 +364,7 @@ export class AppointmentController {
 
   static async reschedule(req: Request, res: Response) {
     const id = req.params.id as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     const { newDate, newTime } = req.body;
 
     if (!newDate || !newTime) {
@@ -450,7 +450,7 @@ export class AppointmentController {
   }
 
   static async getCalendarEvents(req: Request, res: Response) {
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
     if (!hospitalId) {
       return res.status(400).json({ error: 'Hospital context required' });
     }
@@ -524,7 +524,7 @@ export class AppointmentController {
 
   static async getQueue(req: Request, res: Response) {
     const doctorId = req.params.doctorId as string;
-    const hospitalId = req.user?.hospitalId;
+    const hospitalId = req.user?.hospitalId || undefined;
 
     try {
       const today = new Date();
