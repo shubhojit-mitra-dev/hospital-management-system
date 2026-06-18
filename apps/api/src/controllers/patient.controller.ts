@@ -395,7 +395,7 @@ export class PatientController {
         data: {
           id: `vit_${ulid().toLowerCase()}`,
           patientId: id,
-          hospitalId,
+          hospitalId: hospitalId as string,
           appointmentId,
           recordedBy: req.user?.id || '',
           weightKg,
