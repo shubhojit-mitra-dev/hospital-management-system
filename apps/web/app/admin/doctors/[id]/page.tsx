@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Calendar, Clock, ClipboardList, ShieldAlert, Check, Plus, Trash2, CheckCircle2 } from 'lucide-react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import api from '@/lib/axios';
+import { cn } from '@/lib/utils';
 
 interface Schedule {
   id: string;
