@@ -41,6 +41,9 @@ model Hospital {
   suppliers       Supplier[]
   inventoryTransactions InventoryTransaction[]
   dispenseRecords DispenseRecord[]
+  invoices        Invoice[]
+  payments        Payment[]
+  refunds         Refund[]
 }
 
 model User {
@@ -81,6 +84,9 @@ model User {
   enteredLabResults   LabOrderItem[]    @relation("ResultEnterer")
   dispensedPrescriptions DispenseRecord[] @relation("PharmacistDispenser")
   inventoryTransactionsPerformed InventoryTransaction[] @relation("TransactionPerformer")
+  createdInvoices     Invoice[]         @relation("InvoiceCreator")
+  collectedPayments   Payment[]         @relation("PaymentCollector")
+  initiatedRefunds    Refund[]          @relation("RefundInitiator")
 }
 
 model RefreshToken {
@@ -205,6 +211,8 @@ model Patient {
   emrRecords        EMRRecord[]
   labOrders         LabOrder[]
   labResults        LabResult[]
+  invoices          Invoice[]
+  payments          Payment[]
 
   @@map("patients")
 }
@@ -400,6 +408,7 @@ model Appointment {
   queue             AppointmentQueue[]
   vitals            PatientVitals[]
   consultation      Consultation?
+  invoices          Invoice[]
 
   @@map("appointments")
 }
@@ -739,4 +748,117 @@ model DispenseRecord {
   dispenser           User         @relation("PharmacistDispenser", fields: [dispensedBy], references: [id])
 
   @@map("dispense_records")
+}
+
+model Invoice {
+  id                      String        @id @db.Text
+  hospitalId              String        @map("hospital_id")
+  patientId               String        @map("patient_id")
+  invoiceNumber           String        @unique @map("invoice_number")
+  invoiceDate             DateTime      @default(now()) @db.Date @map("invoice_date")
+  dueDate                 DateTime?     @db.Date @map("due_date")
+  appointmentId           String?       @map("appointment_id")
+  subtotal                Decimal       @db.Decimal(12, 2) @default(0)
+  discountAmount          Decimal       @db.Decimal(12, 2) @default(0) @map("discount_amount")
+  discountPercent         Decimal       @db.Decimal(5, 2) @default(0) @map("discount_percent")
+  taxAmount               Decimal       @db.Decimal(12, 2) @default(0) @map("tax_amount")
+  taxPercent              Decimal       @db.Decimal(5, 2) @default(0) @map("tax_percent")
+  totalAmount             Decimal       @db.Decimal(12, 2) @map("total_amount")
+  amountPaid              Decimal       @db.Decimal(12, 2) @default(0) @map("amount_paid")
+  balanceAmount           Decimal?      @db.Decimal(12, 2) @map("balance_amount")
+  insuranceCoveredAmount  Decimal       @db.Decimal(12, 2) @default(0) @map("insurance_covered_amount")
+  insuranceProvider       String?       @map("insurance_provider")
+  insurancePolicyNo       String?       @map("insurance_policy_no")
+  insuranceClaimNo        String?       @map("insurance_claim_no")
+  insuranceStatus         String?       @map("insurance_status")
+  status                  String        @default("DRAFT")
+  notes                   String?
+  createdBy               String?       @map("created_by")
+  finalizedAt             DateTime?     @map("finalized_at")
+  createdAt               DateTime      @default(now()) @map("created_at")
+  updatedAt               DateTime      @updatedAt @map("updated_at")
+
+  hospital                Hospital      @relation(fields: [hospitalId], references: [id])
+  patient                 Patient       @relation(fields: [patientId], references: [id])
+  appointment             Appointment?  @relation(fields: [appointmentId], references: [id])
+  creator                 User?         @relation("InvoiceCreator", fields: [createdBy], references: [id])
+  items                   InvoiceItem[]
+  payments                Payment[]
+  refunds                 Refund[]
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id                  String      @id @db.Text
+  invoiceId           String      @map("invoice_id")
+  hospitalId          String      @map("hospital_id")
+  itemType            String      @map("item_type")
+  description         String
+  quantity            Int         @default(1)
+  unitPrice           Decimal     @db.Decimal(10, 2) @map("unit_price")
+  discountAmount      Decimal     @db.Decimal(10, 2) @default(0) @map("discount_amount")
+  totalPrice          Decimal     @db.Decimal(10, 2) @map("total_price")
+  referenceType       String?     @map("reference_type")
+  referenceId         String?     @map("reference_id")
+  isInsuranceCovered  Boolean     @default(false) @map("is_insurance_covered")
+  createdAt           DateTime    @default(now()) @map("created_at")
+
+  invoice             Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  hospital            Hospital    @relation(fields: [hospitalId], references: [id])
+
+  @@map("invoice_items")
+}
+
+model Payment {
+  id                String       @id @db.Text
+  hospitalId        String       @map("hospital_id")
+  invoiceId         String       @map("invoice_id")
+  patientId         String       @map("patient_id")
+  paymentNumber     String       @unique @map("payment_number")
+  amount            Decimal      @db.Decimal(12, 2)
+  paymentMethod     String       @map("payment_method")
+  upiTransactionId  String?      @map("upi_transaction_id")
+  upiVpa            String?      @map("upi_vpa")
+  cardLastFour      String?      @map("card_last_four")
+  cardType          String?      @map("card_type")
+  gatewayName       String?      @map("gateway_name")
+  gatewayOrderId    String?      @map("gateway_order_id")
+  gatewayPaymentId  String?      @map("gateway_payment_id")
+  gatewaySignature  String?      @map("gateway_signature")
+  status            String       @default("PENDING")
+  failureReason     String?      @map("failure_reason")
+  collectedBy       String?      @map("collected_by")
+  paidAt            DateTime?    @map("paid_at")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  hospital          Hospital     @relation(fields: [hospitalId], references: [id])
+  invoice           Invoice      @relation(fields: [invoiceId], references: [id])
+  patient           Patient      @relation(fields: [patientId], references: [id])
+  collector         User?        @relation("PaymentCollector", fields: [collectedBy], references: [id])
+  refunds           Refund[]
+
+  @@map("payments")
+}
+
+model Refund {
+  id              String       @id @db.Text
+  hospitalId      String       @map("hospital_id")
+  paymentId       String       @map("payment_id")
+  invoiceId       String       @map("invoice_id")
+  refundAmount    Decimal      @db.Decimal(12, 2) @map("refund_amount")
+  reason          String
+  gatewayRefundId String?      @map("gateway_refund_id")
+  status          String       @default("PENDING")
+  initiatedBy     String?      @map("initiated_by")
+  processedAt     DateTime?    @map("processed_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  hospital        Hospital     @relation(fields: [hospitalId], references: [id])
+  payment         Payment      @relation(fields: [paymentId], references: [id])
+  invoice         Invoice      @relation(fields: [invoiceId], references: [id])
+  initiator       User?        @relation("RefundInitiator", fields: [initiatedBy], references: [id])
+
+  @@map("refunds")
 }

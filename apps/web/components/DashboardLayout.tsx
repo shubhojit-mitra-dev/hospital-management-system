@@ -93,6 +93,52 @@ export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps
       });
     }
 
+    // Module 7: Lab Technician
+    if (role === 'LAB_TECHNICIAN') {
+      items.push({
+        name: 'Lab Orders',
+        href: '/lab/orders',
+        icon: ClipboardList,
+      });
+    }
+
+    // Module 8: Pharmacist
+    if (role === 'PHARMACIST') {
+      items.push({
+        name: 'Prescriptions',
+        href: '/pharmacy',
+        icon: ClipboardList,
+      });
+      items.push({
+        name: 'Inventory',
+        href: '/pharmacy/inventory',
+        icon: Layers,
+      });
+    }
+
+    // Module 9: Billing Executive & Hospital Admin
+    if (['HOSPITAL_ADMIN', 'BILLING_EXECUTIVE'].includes(role || '')) {
+      items.push({
+        name: 'Billing & Invoices',
+        href: '/billing',
+        icon: FileSpreadsheet,
+      });
+    }
+
+    // Patient access
+    if (role === 'PATIENT') {
+      items.push({
+        name: 'My Lab Reports',
+        href: '/my-labs',
+        icon: ClipboardList,
+      });
+      items.push({
+        name: 'My Invoices',
+        href: '/my-bills',
+        icon: FileSpreadsheet,
+      });
+    }
+
     return items;
   };
 

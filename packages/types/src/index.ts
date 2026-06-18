@@ -126,5 +126,52 @@ export const dispensePrescriptionSchema = z.object({
 });
 export type DispensePrescriptionRequest = z.infer<typeof dispensePrescriptionSchema>;
 
+// Billing & Payments Schemas
+export const createInvoiceSchema = z.object({
+  patientId: z.string().min(1, "Patient ID is required"),
+  appointmentId: z.string().optional(),
+  dueDate: z.string().optional(),
+  notes: z.string().optional(),
+  items: z.array(z.object({
+    itemType: z.enum(["CONSULTATION", "LAB_TEST", "MEDICINE", "ROOM", "PROCEDURE", "EMERGENCY", "MISC"]),
+    description: z.string().min(1, "Description is required"),
+    quantity: z.number().int().default(1),
+    unitPrice: z.number().min(0, "Unit price must be non-negative"),
+    referenceType: z.string().optional(),
+    referenceId: z.string().optional()
+  })).optional()
+});
+export type CreateInvoiceRequest = z.infer<typeof createInvoiceSchema>;
+
+export const addInvoiceItemSchema = z.object({
+  itemType: z.enum(["CONSULTATION", "LAB_TEST", "MEDICINE", "ROOM", "PROCEDURE", "EMERGENCY", "MISC"]),
+  description: z.string().min(1, "Description is required"),
+  quantity: z.number().int().default(1),
+  unitPrice: z.number().min(0, "Unit price must be non-negative"),
+  referenceType: z.string().optional(),
+  referenceId: z.string().optional()
+});
+export type AddInvoiceItemRequest = z.infer<typeof addInvoiceItemSchema>;
+
+export const recordPaymentSchema = z.object({
+  invoiceId: z.string().min(1, "Invoice ID is required"),
+  amount: z.number().min(0.01, "Amount must be greater than zero"),
+  paymentMethod: z.enum(["CASH", "CARD", "UPI", "INSURANCE", "CHEQUE", "NEFT"]),
+  upiTransactionId: z.string().optional(),
+  upiVpa: z.string().optional(),
+  cardLastFour: z.string().optional(),
+  cardType: z.string().optional(),
+  notes: z.string().optional()
+});
+export type RecordPaymentRequest = z.infer<typeof recordPaymentSchema>;
+
+export const initiatePaymentSchema = z.object({
+  invoiceId: z.string().min(1, "Invoice ID is required"),
+  amount: z.number().min(0.01, "Amount must be greater than zero"),
+  paymentMethod: z.string().default("UPI"),
+  gatewayName: z.string().default("RAZORPAY")
+});
+export type InitiatePaymentRequest = z.infer<typeof initiatePaymentSchema>;
+
 export * from './permissions.js';
 

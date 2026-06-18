@@ -16,6 +16,7 @@ import emrRouter from './routes/emr.routes.js';
 import icdRouter from './routes/icd.routes.js';
 import labRouter from './routes/lab.routes.js';
 import pharmacyRouter from './routes/pharmacy.routes.js';
+import billingRouter from './routes/billing.routes.js';
 
 export const app: Express = express();
 
@@ -41,6 +42,7 @@ app.use('/api/v1/emr', emrRouter);
 app.use('/api/v1/icd-codes', icdRouter);
 app.use('/api/v1/lab', labRouter);
 app.use('/api/v1/pharmacy', pharmacyRouter);
+app.use('/api/v1/billing', billingRouter);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
