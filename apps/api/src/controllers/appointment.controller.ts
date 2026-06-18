@@ -402,7 +402,7 @@ export class AppointmentController {
       const rescheduledApt = await prisma.appointment.create({
         data: {
           id: newAptId,
-          hospitalId,
+          hospitalId: hospitalId as string,
           patientId: appointment.patientId,
           doctorId: appointment.doctorId,
           departmentId: appointment.departmentId,
@@ -422,7 +422,7 @@ export class AppointmentController {
       await prisma.appointmentQueue.create({
         data: {
           id: `q_${ulid().toLowerCase()}`,
-          hospitalId,
+          hospitalId: hospitalId as string,
           doctorId: appointment.doctorId,
           queueDate: new Date(newDate),
           appointmentId: newAptId,
@@ -467,7 +467,9 @@ export class AppointmentController {
       }
 
       if (month) {
-        const [year, m] = (month as string).split('-').map(Number);
+        const parts = (month as string).split('-').map(Number);
+        const year = parts[0] as number;
+        const m = parts[1] as number;
         const start = new Date(year, m - 1, 1);
         const end = new Date(year, m, 0, 23, 59, 59, 999);
         whereClause.appointmentDate = {
@@ -497,7 +499,9 @@ export class AppointmentController {
         if (apt.status === 'CANCELLED') color = '#9E9E9E'; // grey
         if (apt.status === 'NO_SHOW') color = '#F44336'; // red
 
-        const [hours, mins] = apt.appointmentTime.split(':').map(Number);
+        const timeParts = apt.appointmentTime.split(':').map(Number);
+        const hours = timeParts[0] as number;
+        const mins = timeParts[1] as number;
         const startDatetime = new Date(apt.appointmentDate);
         startDatetime.setHours(hours, mins, 0, 0);
 
