@@ -10,6 +10,7 @@ import hospitalRouter from './routes/hospital.routes.js';
 import patientRouter from './routes/patient.routes.js';
 import doctorRouter from './routes/doctor.routes.js';
 import staffRouter from './routes/staff.routes.js';
+import appointmentRouter from './routes/appointment.routes.js';
 
 export const app: Express = express();
 
@@ -29,6 +30,7 @@ app.use('/api/v1/hospitals', hospitalRouter);
 app.use('/api/v1/patients', patientRouter);
 app.use('/api/v1/doctors', doctorRouter);
 app.use('/api/v1/staff', staffRouter);
+app.use('/api/v1/appointments', appointmentRouter);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
