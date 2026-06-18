@@ -11,6 +11,9 @@ import patientRouter from './routes/patient.routes.js';
 import doctorRouter from './routes/doctor.routes.js';
 import staffRouter from './routes/staff.routes.js';
 import appointmentRouter from './routes/appointment.routes.js';
+import consultationRouter from './routes/consultation.routes.js';
+import emrRouter from './routes/emr.routes.js';
+import icdRouter from './routes/icd.routes.js';
 
 export const app: Express = express();
 
@@ -31,6 +34,9 @@ app.use('/api/v1/patients', patientRouter);
 app.use('/api/v1/doctors', doctorRouter);
 app.use('/api/v1/staff', staffRouter);
 app.use('/api/v1/appointments', appointmentRouter);
+app.use('/api/v1/consultations', consultationRouter);
+app.use('/api/v1/emr', emrRouter);
+app.use('/api/v1/icd-codes', icdRouter);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
