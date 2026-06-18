@@ -33,6 +33,24 @@ async function main() {
     console.log('User admin@hms.com already exists. Skipping creation.');
   }
 
+  // Seed default ICD-10 codes
+  console.log('Seeding default ICD-10 codes...');
+  const icdCodes = [
+    { code: 'I10', description: 'Essential (primary) hypertension', category: 'Circulatory' },
+    { code: 'E11', description: 'Type 2 diabetes mellitus', category: 'Endocrine' },
+    { code: 'J45', description: 'Asthma', category: 'Respiratory' },
+    { code: 'M17', description: 'Osteoarthritis of knee', category: 'Musculoskeletal' },
+    { code: 'K21', description: 'Gastro-esophageal reflux disease', category: 'Digestive' },
+  ];
+
+  for (const icd of icdCodes) {
+    await prisma.iCDCode.upsert({
+      where: { code: icd.code },
+      update: {},
+      create: icd,
+    });
+  }
+
   console.log('Database seeded successfully!');
 }
 
