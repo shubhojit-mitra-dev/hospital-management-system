@@ -36,6 +36,11 @@ model Hospital {
   appointments   Appointment[]
   labTestCatalogs LabTestCatalog[]
   labOrders       LabOrder[]
+  medicines       Medicine[]
+  medicineInventory MedicineInventory[]
+  suppliers       Supplier[]
+  inventoryTransactions InventoryTransaction[]
+  dispenseRecords DispenseRecord[]
 }
 
 model User {
@@ -74,6 +79,8 @@ model User {
   sampleCollected     LabOrder[]        @relation("SampleCollector")
   reviewedLabOrders   LabOrder[]        @relation("LabReviewer")
   enteredLabResults   LabOrderItem[]    @relation("ResultEnterer")
+  dispensedPrescriptions DispenseRecord[] @relation("PharmacistDispenser")
+  inventoryTransactionsPerformed InventoryTransaction[] @relation("TransactionPerformer")
 }
 
 model RefreshToken {
@@ -466,6 +473,8 @@ model Prescription {
   patient           Patient                @relation(fields: [patientId], references: [id])
   doctor            Doctor                 @relation(fields: [doctorId], references: [id])
   items             PrescriptionItem[]
+  dispenseRecords   DispenseRecord[]
+  inventoryTransactions InventoryTransaction[]
 
   @@map("prescriptions")
 }
@@ -619,4 +628,115 @@ model LabResult {
   patient         Patient      @relation(fields: [patientId], references: [id])
 
   @@map("lab_results")
+}
+
+model Supplier {
+  id              String             @id @db.Text
+  hospitalId      String             @map("hospital_id")
+  name            String
+  contactPerson   String?            @map("contact_person")
+  phone           String?
+  email           String?
+  address         String?
+  drugLicenseNo   String?            @map("drug_license_no")
+  gstNo           String?            @map("gst_no")
+  isActive        Boolean            @default(true) @map("is_active")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  hospital        Hospital           @relation(fields: [hospitalId], references: [id])
+  inventories     MedicineInventory[]
+
+  @@map("suppliers")
+}
+
+model Medicine {
+  id                     String              @id @db.Text
+  hospitalId             String              @map("hospital_id")
+  brandName              String              @map("brand_name")
+  genericName            String              @map("generic_name")
+  composition            String?
+  category               String
+  manufacturer           String?
+  drugSchedule           String?             @map("drug_schedule")
+  isPrescriptionRequired Boolean             @default(true) @map("is_prescription_required")
+  unitOfMeasure          String              @default("Tablet") @map("unit_of_measure")
+  mrp                    Decimal?            @db.Decimal(10, 2)
+  sellingPrice           Decimal             @db.Decimal(10, 2) @map("selling_price")
+  isActive               Boolean             @default(true) @map("is_active")
+  createdAt              DateTime            @default(now()) @map("created_at")
+  updatedAt              DateTime            @updatedAt @map("updated_at")
+
+  hospital               Hospital            @relation(fields: [hospitalId], references: [id])
+  inventory              MedicineInventory[]
+  transactions           InventoryTransaction[]
+
+  @@map("medicines")
+}
+
+model MedicineInventory {
+  id              String                 @id @db.Text
+  hospitalId      String                 @map("hospital_id")
+  medicineId      String                 @map("medicine_id")
+  batchNumber     String                 @map("batch_number")
+  quantity        Int                    @default(0)
+  reorderLevel    Int                    @default(50) @map("reorder_level")
+  manufactureDate DateTime?              @map("manufacture_date")
+  expiryDate      DateTime               @map("expiry_date")
+  purchasePrice   Decimal?               @db.Decimal(10, 2) @map("purchase_price")
+  supplierId      String?                @map("supplier_id")
+  receivedDate    DateTime               @default(now()) @map("received_date")
+  location        String?
+  isActive        Boolean                @default(true) @map("is_active")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+
+  hospital        Hospital               @relation(fields: [hospitalId], references: [id])
+  medicine        Medicine               @relation(fields: [medicineId], references: [id])
+  supplier        Supplier?              @relation(fields: [supplierId], references: [id])
+  transactions    InventoryTransaction[]
+
+  @@unique([medicineId, batchNumber])
+  @@map("medicine_inventory")
+}
+
+model InventoryTransaction {
+  id              String            @id @db.Text
+  hospitalId      String            @map("hospital_id")
+  medicineId      String            @map("medicine_id")
+  inventoryId     String            @map("inventory_id")
+  transactionType String            @map("transaction_type")
+  quantityChange  Int               @map("quantity_change")
+  quantityBefore  Int               @map("quantity_before")
+  quantityAfter   Int               @map("quantity_after")
+  prescriptionId  String?           @map("prescription_id")
+  referenceId     String?           @map("reference_id")
+  notes           String?
+  performedBy     String            @map("performed_by")
+  createdAt       DateTime          @default(now()) @map("created_at")
+
+  hospital        Hospital          @relation(fields: [hospitalId], references: [id])
+  medicine        Medicine          @relation(fields: [medicineId], references: [id])
+  inventory       MedicineInventory @relation(fields: [inventoryId], references: [id])
+  prescription    Prescription?     @relation(fields: [prescriptionId], references: [id])
+  performer       User              @relation("TransactionPerformer", fields: [performedBy], references: [id])
+
+  @@map("inventory_transactions")
+}
+
+model DispenseRecord {
+  id                  String       @id @db.Text
+  hospitalId          String       @map("hospital_id")
+  prescriptionId      String       @map("prescription_id")
+  dispensedBy         String       @map("dispensed_by")
+  dispensedAt         DateTime     @default(now()) @map("dispensed_at")
+  totalAmount         Decimal?     @db.Decimal(10, 2) @map("total_amount")
+  notes               String?
+  patientSignatureUrl String?      @map("patient_signature_url")
+
+  hospital            Hospital     @relation(fields: [hospitalId], references: [id])
+  prescription        Prescription @relation(fields: [prescriptionId], references: [id])
+  dispenser           User         @relation("PharmacistDispenser", fields: [dispensedBy], references: [id])
+
+  @@map("dispense_records")
 }

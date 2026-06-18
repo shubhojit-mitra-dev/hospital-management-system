@@ -86,5 +86,45 @@ export const uploadLabResultsSchema = z.object({
 });
 export type UploadLabResultsRequest = z.infer<typeof uploadLabResultsSchema>;
 
+// Pharmacy & Inventory Management Schemas
+export const addMedicineSchema = z.object({
+  brandName: z.string().min(1, "Brand name is required"),
+  genericName: z.string().min(1, "Generic name is required"),
+  composition: z.string().optional(),
+  category: z.string().min(1, "Category is required"),
+  manufacturer: z.string().optional(),
+  drugSchedule: z.string().optional(),
+  isPrescriptionRequired: z.boolean().default(true),
+  unitOfMeasure: z.string().default("Tablet"),
+  mrp: z.number().optional(),
+  sellingPrice: z.number().min(0, "Selling price must be non-negative")
+});
+export type AddMedicineRequest = z.infer<typeof addMedicineSchema>;
+
+export const addInventoryBatchSchema = z.object({
+  medicineId: z.string().min(1, "Medicine ID is required"),
+  batchNumber: z.string().min(1, "Batch number is required"),
+  quantity: z.number().int().min(1, "Quantity must be at least 1"),
+  reorderLevel: z.number().int().default(50),
+  manufactureDate: z.string().optional(),
+  expiryDate: z.string().min(1, "Expiry date is required"),
+  purchasePrice: z.number().optional(),
+  supplierId: z.string().optional(),
+  location: z.string().optional()
+});
+export type AddInventoryBatchRequest = z.infer<typeof addInventoryBatchSchema>;
+
+export const dispensePrescriptionSchema = z.object({
+  items: z.array(z.object({
+    prescriptionItemId: z.string().min(1, "Prescription Item ID is required"),
+    quantityDispensed: z.number().int().min(0, "Quantity must be non-negative"),
+    inventoryId: z.string().optional(),
+    batchNumber: z.string().optional(),
+    reason: z.string().optional()
+  })),
+  notes: z.string().optional()
+});
+export type DispensePrescriptionRequest = z.infer<typeof dispensePrescriptionSchema>;
+
 export * from './permissions.js';
 

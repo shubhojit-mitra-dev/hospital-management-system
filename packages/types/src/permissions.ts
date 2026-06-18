@@ -9,7 +9,10 @@ export type Permission =
   | 'staff:write'
   | 'lab:read'
   | 'lab:write'
-  | 'lab_catalog:write';
+  | 'lab_catalog:write'
+  | 'pharmacy:read'
+  | 'pharmacy:write'
+  | 'pharmacy_catalog:write';
 
 export const ALL_PERMISSIONS: Permission[] = [
   'hospital:read',
@@ -23,6 +26,9 @@ export const ALL_PERMISSIONS: Permission[] = [
   'lab:read',
   'lab:write',
   'lab_catalog:write',
+  'pharmacy:read',
+  'pharmacy:write',
+  'pharmacy_catalog:write',
 ];
 
 export const RolePermissions: Record<string, Permission[]> = {
@@ -38,6 +44,9 @@ export const RolePermissions: Record<string, Permission[]> = {
     'lab:read',
     'lab:write',
     'lab_catalog:write',
+    'pharmacy:read',
+    'pharmacy:write',
+    'pharmacy_catalog:write',
   ],
   DOCTOR: [
     'hospital:read',
@@ -46,6 +55,7 @@ export const RolePermissions: Record<string, Permission[]> = {
     'staff:read',
     'lab:read',
     'lab:write',
+    'pharmacy:read',
   ],
   NURSE: [
     'hospital:read',
@@ -74,6 +84,9 @@ export const RolePermissions: Record<string, Permission[]> = {
     'department:read',
     'holiday:read',
     'staff:read',
+    'pharmacy:read',
+    'pharmacy:write',
+    'pharmacy_catalog:write',
   ],
   BILLING_EXECUTIVE: [
     'hospital:read',
