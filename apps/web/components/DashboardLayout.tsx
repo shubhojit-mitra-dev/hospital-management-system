@@ -184,6 +184,21 @@ export function DashboardLayout({ children, allowedRoles }: DashboardLayoutProps
     // Patient access
     if (role === 'PATIENT') {
       items.push({
+        name: 'My Profile',
+        href: `/patients/${user?.patientId || ''}`,
+        icon: Users,
+      });
+      items.push({
+        name: 'Book Appointment',
+        href: '/book-appointment',
+        icon: Calendar,
+      });
+      items.push({
+        name: 'My Appointments',
+        href: '/my-appointments',
+        icon: Clock,
+      });
+      items.push({
         name: 'My Lab Reports',
         href: '/my-labs',
         icon: ClipboardList,

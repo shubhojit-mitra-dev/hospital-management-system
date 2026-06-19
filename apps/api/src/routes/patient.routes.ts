@@ -42,7 +42,7 @@ router.delete(
 router.get(
   '/:id/history',
   authenticate,
-  authorize('SUPER_ADMIN', 'HOSPITAL_ADMIN', 'DOCTOR', 'NURSE'),
+  authorize('SUPER_ADMIN', 'HOSPITAL_ADMIN', 'DOCTOR', 'NURSE', 'PATIENT'),
   PatientController.getMedicalHistory
 );
 
@@ -56,7 +56,7 @@ router.patch(
 router.get(
   '/:id/vitals',
   authenticate,
-  authorize('SUPER_ADMIN', 'HOSPITAL_ADMIN', 'DOCTOR', 'NURSE'),
+  authorize('SUPER_ADMIN', 'HOSPITAL_ADMIN', 'DOCTOR', 'NURSE', 'PATIENT'),
   PatientController.getVitals
 );
 

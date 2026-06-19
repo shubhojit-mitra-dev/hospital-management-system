@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Layers, Search, PlusCircle, Pencil, Trash2, X, Loader2, Info } from 'lucide-react';
 import api from '@/lib/axios';
 import { useAuthStore } from '@/store/authStore';
+import { DashboardLayout } from '@/components/DashboardLayout';
 
 interface Department {
   id: string;
@@ -114,7 +115,8 @@ export default function DepartmentsDashboard() {
   );
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout allowedRoles={['HOSPITAL_ADMIN']}>
+      <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -265,5 +267,6 @@ export default function DepartmentsDashboard() {
         </div>
       )}
     </div>
+    </DashboardLayout>
   );
 }

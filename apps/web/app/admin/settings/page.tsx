@@ -5,6 +5,7 @@ import { Settings, Clock, CalendarDays, Loader2, Save, Info, Building2 } from 'l
 import api from '@/lib/axios';
 import { useAuthStore } from '@/store/authStore';
 import { HolidayCalendar } from '@/components/HolidayCalendar';
+import { DashboardLayout } from '@/components/DashboardLayout';
 
 interface HospitalDetails {
   id: string;
@@ -136,14 +137,17 @@ export default function HospitalSettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
-      </div>
+      <DashboardLayout allowedRoles={['HOSPITAL_ADMIN']}>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="space-y-10 pb-16">
+    <DashboardLayout allowedRoles={['HOSPITAL_ADMIN']}>
+      <div className="space-y-10 pb-16">
       {/* Page Header */}
       <div>
         <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -351,5 +355,6 @@ export default function HospitalSettingsPage() {
         <HolidayCalendar hospitalId={hospitalId ?? undefined} />
       </div>
     </div>
+    </DashboardLayout>
   );
 }

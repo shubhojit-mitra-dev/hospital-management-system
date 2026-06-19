@@ -148,6 +148,7 @@ export const RolePermissions: Record<string, Permission[]> = {
   ],
   PATIENT: [
     'hospital:read',
+    'department:read',
     'billing:read',
     'inpatient:read',
     'notifications:read',

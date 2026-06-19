@@ -7,7 +7,7 @@ const router: Router = Router();
 router.post(
   '/',
   authenticate,
-  authorize('HOSPITAL_ADMIN', 'RECEPTIONIST', 'DOCTOR', 'NURSE'),
+  authorize('HOSPITAL_ADMIN', 'RECEPTIONIST', 'DOCTOR', 'NURSE', 'PATIENT'),
   AppointmentController.book
 );
 

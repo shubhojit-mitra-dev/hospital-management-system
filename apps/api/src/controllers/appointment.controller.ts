@@ -23,7 +23,18 @@ export class AppointmentController {
       notes,
     } = req.body;
 
-    if (!patientId || !doctorId || !departmentId || !appointmentDate || !appointmentTime) {
+    let resolvedPatientId = patientId;
+    if (req.user?.role === 'PATIENT') {
+      const patient = await prisma.patient.findUnique({
+        where: { userId: req.user.id }
+      });
+      if (!patient) {
+        return res.status(400).json({ error: 'No patient profile linked to this user account' });
+      }
+      resolvedPatientId = patient.id;
+    }
+
+    if (!resolvedPatientId || !doctorId || !departmentId || !appointmentDate || !appointmentTime) {
       return res.status(400).json({ error: 'Missing required parameters: patientId, doctorId, departmentId, appointmentDate, appointmentTime' });
     }
 
@@ -61,7 +72,7 @@ export class AppointmentController {
         data: {
           id,
           hospitalId,
-          patientId,
+          patientId: resolvedPatientId,
           doctorId,
           departmentId,
           appointmentType: appointmentType || 'NEW',
@@ -104,7 +115,7 @@ export class AppointmentController {
         action: 'BOOK_APPOINTMENT',
         entityType: 'APPOINTMENT',
         entityId: id,
-        description: `Booked appointment for patient id ${patientId} with doctor id ${doctorId} (Token #${tokenNumber})`,
+        description: `Booked appointment for patient id ${resolvedPatientId} with doctor id ${doctorId} (Token #${tokenNumber})`,
         ipAddress: req.ip,
       });
 
@@ -161,8 +172,18 @@ export class AppointmentController {
         hospitalId,
       };
 
+      if (req.user?.role === 'PATIENT') {
+        const patient = await prisma.patient.findUnique({
+          where: { userId: req.user.id }
+        });
+        if (!patient) {
+          return res.status(400).json({ error: 'No patient profile linked to this user account' });
+        }
+        whereClause.patientId = patient.id;
+      } else if (patientId) {
+        whereClause.patientId = patientId as string;
+      }
       if (doctorId) whereClause.doctorId = doctorId as string;
-      if (patientId) whereClause.patientId = patientId as string;
       if (departmentId) whereClause.departmentId = departmentId as string;
       if (status) whereClause.status = status as string;
       
@@ -219,6 +240,15 @@ export class AppointmentController {
 
       if (!appointment) {
         return res.status(404).json({ error: 'Appointment not found' });
+      }
+
+      if (req.user?.role === 'PATIENT') {
+        const patient = await prisma.patient.findUnique({
+          where: { userId: req.user.id }
+        });
+        if (!patient || appointment.patientId !== patient.id) {
+          return res.status(403).json({ error: 'Forbidden: You do not have access to this appointment' });
+        }
       }
 
       return res.status(200).json(appointment);
@@ -384,6 +414,15 @@ export class AppointmentController {
         return res.status(404).json({ error: 'Appointment not found' });
       }
 
+      if (req.user?.role === 'PATIENT') {
+        const patient = await prisma.patient.findUnique({
+          where: { userId: req.user.id }
+        });
+        if (!patient || appointment.patientId !== patient.id) {
+          return res.status(403).json({ error: 'Forbidden: You cannot cancel this appointment' });
+        }
+      }
+
       const updated = await prisma.appointment.update({
         where: { id },
         data: {
@@ -469,6 +508,15 @@ export class AppointmentController {
 
       if (!appointment) {
         return res.status(404).json({ error: 'Appointment not found' });
+      }
+
+      if (req.user?.role === 'PATIENT') {
+        const patient = await prisma.patient.findUnique({
+          where: { userId: req.user.id }
+        });
+        if (!patient || appointment.patientId !== patient.id) {
+          return res.status(403).json({ error: 'Forbidden: You cannot reschedule this appointment' });
+        }
       }
 
       // Check slot availability
