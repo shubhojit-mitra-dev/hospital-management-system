@@ -34,13 +34,19 @@ export class EmailService {
   static async sendEmail(options: { to: string; subject: string; text: string; html?: string }): Promise<void> {
     const tx = this.getTransporter();
     if (tx) {
-      await tx.sendMail({
-        from: env.SMTP_FROM || 'no-reply@hms.com',
-        to: options.to,
-        subject: options.subject,
-        text: options.text,
-        html: options.html,
-      });
+      try {
+        await tx.sendMail({
+          from: env.SMTP_FROM || 'no-reply@hms.com',
+          to: options.to,
+          subject: options.subject,
+          text: options.text,
+          html: options.html,
+        });
+      } catch (err) {
+        console.warn('SMTP Send Failed. Falling back to console log. Error:', err);
+        console.log(`[Email Fallback Mock Log] To: ${options.to} | Subject: ${options.subject}`);
+        console.log(`Text: ${options.text}`);
+      }
     } else {
       console.log(`[Email Mock Log] To: ${options.to} | Subject: ${options.subject}`);
       console.log(`Text: ${options.text}`);

@@ -49,6 +49,10 @@ export class AdminController {
         },
       });
 
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`\n===========================================\n>>> [STAFF TEMP PASSWORD FOR DEVELOPMENT]: ${tempPassword}\n===========================================\n`);
+      }
+
       await EmailService.sendEmail({
         to: email,
         subject: 'Welcome to HMS - Staff Account Created',
